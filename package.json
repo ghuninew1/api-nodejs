@@ -1,17 +1,26 @@
 {
   "name": "@ghuninew1/api-nodejs",
-  "version": "1.0.0",
   "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "start": "node ./bin/www"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "cookie-parser": "^1.4.6",
-    "debug": "^4.3.4",
-    "express": "^4.18.2",
-    "http-errors": "^2.0.0",
-    "jade": "^1.11.0",
-    "mongoose": "^7.4.3",
-    "morgan": "^1.10.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.4",
+    "eslint": "^8.47.0",
+    "eslint-plugin-react": "^7.33.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "vite": "^4.4.9"
   }
 }
