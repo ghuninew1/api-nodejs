@@ -1,15 +1,15 @@
-let express = require('express'),
-    mongoose = require('mongoose'),
-    cors = require('cors'),
-    bodyParser = require('body-parser'),
-    dbConfig = require('./database/db');
-    path = require('path');
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const dbConfig = require('./database/db');
+const path = require('path');
+const Student = require('./models/Student')
 
 // Express Route
-const studentRoute = require('./routes/student.route');
 
 // Connecting MongDB Database
-mongoose.Promise = global.Promise;
+
 mongoose.connect(dbConfig.db, {
     useNewUrlParser: true,
     // useUnifiedTopology: true
@@ -27,7 +27,70 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 app.use(cors());
-app.use('/students', studentRoute);
+
+app.get('/', (req, res) => {
+    res.send(JSON.parse('{"message": "Hello World"}'))
+});
+
+app.post( '/api/student', async (req, res) => {
+    const payload = req.body;
+    const student = new Student(payload);
+    try {
+        await student.save();
+        res.status(200).json(student);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+});
+
+app.get('/api/student', async (req, res) => {
+    try {
+        const students = await Student.find();
+        res.status(200).json(students);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+})
+
+app.get('/api/student/:id', async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id);
+        res.status(200).json(student);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+})
+
+app.put('/api/student/:id', async (req, res) => {
+    try {
+        const payload = req.body;
+        const student = await Student.findByIdAndUpdate(req.params.id, payload, {new: true});
+        res.status(200).json(student);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+})
+
+app.delete('/api/student/:id', async (req, res) => {
+    try {
+        const student = await Student.findByIdAndDelete(req.params.id);
+        res.status(200).json(student);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+})
+
+// Static build
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../build')))
@@ -43,13 +106,10 @@ const server = app.listen(port, () => {
     console.log('Connected to port ' + port)
 })
 
-// 404 Error
-app.use((req, res, next) => {
-    next(createError(404))
-})
+
 
 // Error handler
-app.use(function(err, req, res, next) {
+app.use(function(err, req, res) {
     console.error(err.message);
     if (!err.statusCode) err.statusCode = 500;
     res.status(err.statusCode).send(err.message);

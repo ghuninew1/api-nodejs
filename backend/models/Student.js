@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
-let studentSchema = new Schema({
+const studentSchema = new Schema({
     name: {
         type: String
     },
@@ -11,9 +11,12 @@ let studentSchema = new Schema({
     },
     rollno: {
         type: Number
-    }
-}, {
-    collection: "students"
-})
+    },
+    },
+    {
+        timestamps: true, versionKey: false
+    },
+);
+const StudentModel = mongoose.model('Student', studentSchema);
 
-module.exports = mongoose.model('Student', studentSchema);
+module.exports = StudentModel;
