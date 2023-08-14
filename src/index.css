@@ -25,7 +25,6 @@ li,a {
   padding: 0;
   margin: auto;
   text-align: center;
-  position: relative;
 }
 .light {
   color: #000;
@@ -84,7 +83,7 @@ li,a {
   margin-left: auto;
   margin-right: auto;
   padding: 0;
-  display: inline-block;
+  display: block;
   position: fixed;
   justify-items: center;
   transition: opacity linear 0.1s;

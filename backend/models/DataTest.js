@@ -2,21 +2,21 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
-const studentSchema = new Schema({
+const datatestSchema = new Schema({
     name: {
         type: String
     },
-    email: {
+    alt: {
         type: String
     },
-    rollno: {
-        type: Number
+    image: {
+        type: String
     },
     },
     {
         timestamps: true, versionKey: false,
     },
 );
-const StudentModel = mongoose.model('Student', studentSchema);
+const DatatestModel = mongoose.model('Datatest', datatestSchema);
 
-module.exports = StudentModel;
+module.exports = DatatestModel;

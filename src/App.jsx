@@ -1,19 +1,15 @@
-import { useState } from 'react'
+// import { useState } from 'react'
 import {  createBrowserRouter, RouterProvider, Outlet, Navigate  } from 'react-router-dom'
 import './App.css'
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import CreateStudent from './components/CreateStudent'
 import StudentList from './components/StudentList'
 import NavBar from './components/NavBar'
 import Themes from './components/Themes'
 import EditStudent from './components/EditStudent'
 
 
+function App() {  
 
-function App() {
-  // const [count, setCount] = useState(0)
-  
-  
   const router = createBrowserRouter([
     {
       path: '/',
@@ -21,20 +17,17 @@ function App() {
       children: [
         {
           index: true,
-          element: 'Home',
+          element: <h1>Home</h1>,
         },
         {
-          path: '/list',
+          path: 'Api-List',
           element: <StudentList />,
-        },
-        {
-          path: '/create',
-          element: <CreateStudent />,
-        },
-        {
-          path: '/edit/:id',
-          element: <EditStudent />,
-
+          children: [
+            {
+              path: 'edit/:id',
+              element: <EditStudent />,
+            },
+          ],
         },
       ],
     },
@@ -43,7 +36,7 @@ function App() {
       element: <Navigate to='/' replace />,
     },
   ])
-  return <RouterProvider router={router} fallbackElement={"...Loading"} />;
+  return <RouterProvider router={router} future={{ v7_startTransition: true }} />;
 }
 
 function Root() {

@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import './NavBar.css'
 
 const NavBar = () => {
@@ -16,8 +16,7 @@ const NavBar = () => {
             <ul className="menu">
                     <ul className="nav-links">
                         <li className={isActiveLi("")}><NavLink end to="/" style={isActive(name)}>Home</NavLink></li>
-                        <NavBars name={"list"} />
-                        <NavBars name={"create"} />
+                        <NavBars name={"Api-List"} />
                     </ul>
             </ul>
         </nav>

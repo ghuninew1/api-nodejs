@@ -10,16 +10,21 @@ const EditStudent = () => {
     let { id } = useParams()
 
     useEffect(() => {
-        fetchData()
-        
-    }, [])
+        fetchData()        
+    }, [id])
+
     async function fetchData() {
         const response = await axios.get('http://localhost:4000/api/student/' + id)
         const data = response.data
         setStudents(data)
     }
-    const onSubmit = (e) => {
+
+    const onSubmit = async (e) => {
         e.preventDefault()
+
+        setName('')
+        setEmail('')
+        setRollno('')
 
         const StudentObject = {
             name: name,
@@ -27,14 +32,12 @@ const EditStudent = () => {
             rollno: rollno
         }
 
-        axios.put(`http://localhost:4000/api/student/` + id, StudentObject)
+        await axios.put(`http://localhost:4000/api/student/` + id, StudentObject)
             .then(res => console.log(res.data))
             .catch(error => { console.log(error)})
-
     }
-    console.log(students)
-  return (
-    <div>
+return (
+    <>
         <h1>EditStudent</h1>
         <form onSubmit={onSubmit}>
             <div className="form-group">
@@ -47,13 +50,13 @@ const EditStudent = () => {
             </div>
             <div className="form-group">
                 <label>Student Rollno</label>
-                <input type="text" value={students.rollno} onChange={(e)=>setRollno(e.target.value)} className="form-control" />
+                <input type="number" value={students.rollno} onChange={(e)=>setRollno(e.target.value)} className="form-control" />
             </div>
             <div className="form-group">
-                <button type="submit" className="btn btn-primary">Submit</button>
+                <button type="submit" className="btn">Submit</button>
             </div>
         </form>
-    </div>
+    </>
   )
 }
 

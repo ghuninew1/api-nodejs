@@ -1,13 +1,14 @@
 import axios from 'axios'
 import { useState, useEffect } from 'react'
-import { Link,Routes, Route,useParams } from 'react-router-dom'
+import { Link, useParams, Outlet } from 'react-router-dom'
 import { StudentContext } from './ThemeContext'
-import EditStudent from './EditStudent'
 
 const StudentList = () => {
     const [students, setStudents] = useState([])
-    const [ isActive, setIsActive ] = useState(false)
-
+    const [ isActive, setIsActive ] = useState(true)
+    const [name, setName] = useState()
+    const [email, setEmail] = useState()
+    const [rollno, setRollno] = useState()
 
     useEffect(() => {
         getStudents()
@@ -37,21 +38,44 @@ const StudentList = () => {
             <td>{obj.name}</td>
             <td>{obj.email}</td>
             <td>{obj.rollno}</td>
-            <td>{String(obj.updatedAt).substring(8,22)}</td>
+            <td>{new Date(obj.updatedAt).toLocaleString('th')}</td>
             <td>
               {/* <button onClick={()=>setIsActive(true)}>Edit</button> */}
-              <Link to={`/edit/${obj._id}`}>Edit</Link>
-              <button onClick={()=>deleteStudent(obj._id)}>Delete</button>
+              <Link to={`/Api-List/edit/${obj._id}`}>Edit</Link>
+              <button className='btn' onClick={()=>deleteStudent(obj._id)}>Delete</button>
           </td>
         </tr>
         )
     }))
 
-  console.log(students)
+    const onSubmit = async (e) => {
+        e.preventDefault()
+
+        setName('')
+        setEmail('')
+        setRollno('')
+
+        const StudentObject = {
+            name: name,
+            email: email,
+            rollno: rollno
+        }
+
+        await axios.post('http://localhost:4000/api/student', StudentObject)
+            .then(res => console.log(res.data))
+
+        getStudents()
+        alert('Student Added Successfully')
+    }
   return (
     <>
         <StudentContext.Provider value={students}>
-        <h1>StudentList</h1>
+        <Outlet />
+        <span >
+            <h1>StudentList</h1>
+            {isActive ? <button className='btn' onClick={()=>setIsActive(!isActive)}>Add</button> : 
+            <button className='btn' onClick={()=>setIsActive(!isActive)}>Cancel</button> }
+        </span>
         <table className='table'>
             <thead >
                 <tr >
@@ -61,11 +85,19 @@ const StudentList = () => {
                     <td>updatedAt</td>
                     <td>Actions</td>
                 </tr>
+                
             </thead>
             <tbody>
-                {isActive ? <EditStudent /> : <DataTable />}
+                {isActive ? <DataTable /> : 
+                <tr >
+                    <td><input type="text" value={name} onChange={(e)=>setName(e.target.value)} /></td>
+                    <td><input type="text" value={email} onChange={(e)=>setEmail(e.target.value)} /></td>
+                    <td><input type="number" value={rollno} onChange={(e)=>setRollno(e.target.value)} /></td>
+                    <td>{new Date().toLocaleString('th')}</td>
+                    <td><button onClick={(e)=>onSubmit(e)} className="btn">Submit</button></td> 
+                </tr>
+                }
                 
-
             </tbody>
         </table>
         </StudentContext.Provider>
