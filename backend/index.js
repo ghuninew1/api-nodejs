@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -45,7 +46,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const port = process.env.PORT || 4000;
-const server = app.listen(port, () => {
+app.listen(port, () => {
     console.log('Connected to port ' + port)
 })
 

@@ -8,7 +8,6 @@ const NavBar = () => {
     const isActiveLi = (name) => splitLocation[1] === name ? "active" : ""
     const isActive = (name) => splitLocation[1] === name ? {textDecoration: 'none',color: "red",fontWeight: "bold"} : {textDecoration: 'none'}
 
-    // eslint-disable-next-line react/prop-types
     const NavBars = ({name}) => <li className={isActiveLi(name)}><NavLink to={name} style={isActive(name)}>{name}</NavLink></li>
   return (
     <>

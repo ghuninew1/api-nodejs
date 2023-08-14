@@ -2,11 +2,9 @@
 import {  createBrowserRouter, RouterProvider, Outlet, Navigate  } from 'react-router-dom'
 import './App.css'
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import StudentList from './components/StudentList'
+import StudentList from './components/ApiCrud'
 import NavBar from './components/NavBar'
 import Themes from './components/Themes'
-import EditStudent from './components/EditStudent'
-
 
 function App() {  
 
@@ -25,7 +23,7 @@ function App() {
           children: [
             {
               path: 'edit/:id',
-              element: <EditStudent />,
+              element: "edit",
             },
           ],
         },
