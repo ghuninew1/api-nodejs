@@ -1,10 +1,11 @@
 // import { useState } from 'react'
-import {  createBrowserRouter, RouterProvider, Outlet, Navigate  } from 'react-router-dom'
+import {  createBrowserRouter, RouterProvider, Outlet  } from 'react-router-dom'
 import './App.css'
-// import 'bootstrap/dist/css/bootstrap.min.css';
-import StudentList from './components/ApiCrud'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import StudentList from './pages/api1/ApiCrud'
 import NavBar from './components/NavBar'
 import Themes from './components/Themes'
+import Api2 from './pages/api2';
 
 function App() {  
 
@@ -18,7 +19,7 @@ function App() {
           element: <h1>Home</h1>,
         },
         {
-          path: 'Api-List',
+          path: 'Api1',
           element: <StudentList />,
           children: [
             {
@@ -27,14 +28,18 @@ function App() {
             },
           ],
         },
+        {
+          path: 'Api2',
+          element: <Api2 />,
+        },
+        {
+          path: '*',
+          element: "Error 404",
+        },
       ],
     },
-    {
-      path: '*',
-      element: <Navigate to='/' replace />,
-    },
   ])
-  return <RouterProvider router={router} future={{ v7_startTransition: true }} />;
+  return <RouterProvider router={router} />;
 }
 
 function Root() {
