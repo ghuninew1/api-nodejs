@@ -16,14 +16,7 @@ const StudentList = () => {
 
     useEffect(() => {
         handleGetdata()
-        if(isEdit !== null) {
-            const student = students.find(obj => obj._id === isEdit)
-            setName(student.name)
-            setEmail(student.email)
-            setRollno(student.rollno)
-        }
-        
-    }, [isEdit])
+    }, [])
 
     const handleGetdata = async () => {
         await axios.get('http://localhost:4000/api/student')
