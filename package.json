@@ -1,15 +1,15 @@
 {
   "name": "@ghuninew1/api-nodejs",
   "version": "1.0.1",
-  "description": "",
+  "description": "Nothing",
   "main": "src/index.js",
   "type": "commonjs",
+  "author": "GhuniNew",
+  "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install && npm run build"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",

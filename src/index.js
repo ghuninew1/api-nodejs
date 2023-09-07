@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 
 // const flash = require("express-flash");
-// const session = require("express-session");
+const session = require("express-session");
 
 const studentRoute = require("./api/student");
 const productRoute = require("./api/products");
@@ -28,12 +28,20 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../public")));
 
 // app.use(session({
+    // name: "ghuniNew",
 //   cookie: { maxAge: 60 },
 //   store: new session.MemoryStore,
 //   saveUninitialized: true,
 //   resave: 'true',
 //   secret: 'secret'
 // }))
+app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+  secret: 'ghuninew test',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true, maxAge: 60 }
+}))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -51,15 +59,16 @@ app.use((req, res, next) => {
 
 app.get("/", (req, res) => {
     const dataRes = resTime(process.hrtime()) + " ms" 
-    res.render('index', {title: "GNEW", maindata: dataRes})
+    const result =[dataRes, req.sessionID, req.session.cookie.maxAge]
+    res.render('index', {title: "GNEW", maindata: "GhuniNew", secdata: result});
 });
 
+app.route
+
+// routes Api
 studentRoute(app);
 productRoute(app);
 datatestRoute(app);
-app.use(studentRoute);
-app.use(productRoute);
-app.use(datatestRoute);
 
 // AuthorizationRouter.routesConfig(app);
 // UsersRouter.routesConfig(app);
