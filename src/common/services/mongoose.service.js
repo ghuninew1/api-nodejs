@@ -3,17 +3,18 @@ let count = 0;
 
 const options = {
     autoIndex: false, // Don't build indexes
-    poolSize: 10, // Maintain up to 10 socket connections
+    // poolSize: 10, // Maintain up to 10 socket connections
     // If not connected, return errors immediately rather than waiting for reconnect
-    bufferMaxEntries: 0,
+    // bufferMaxEntries: 0,
     // all other approaches are now deprecated by MongoDB:
     useNewUrlParser: true,
-    useUnifiedTopology: true
-    
+    useUnifiedTopology: true,
+    user: "admin1",
+    pass: "bbpadmin@2022",
 };
 const connectWithRetry = () => {
-    console.log('MongoDB connection with retry')
-    mongoose.connect("mongodb://localhost:27017/rest-tutorial", options).then(()=>{
+    console.log('MongoDB connection with retry '+count)
+    mongoose.connect("mongodb://mongo.bigbrain-studio.com", options).then(()=>{
         console.log('MongoDB is connected')
     }).catch(err=>{
         console.log('MongoDB connection unsuccessful, retry after 5 seconds. ', ++count);

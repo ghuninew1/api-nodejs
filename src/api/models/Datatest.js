@@ -1,8 +1,6 @@
-const mongoose = require("mongoose");
+const mongoose = require('../../common/services/mongoose.service').mongoose;
 
-const {
-  Schema
-} = mongoose;
+const { Schema } = mongoose;
 const datatestSchema = new Schema({
   name: {
     type: String

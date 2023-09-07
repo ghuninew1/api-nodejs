@@ -1,4 +1,4 @@
-const Student = require("../models/Student");
+const Student = require("./models/Student");
 
 module.exports = app => {
   app.post('/api/student', async (req, res) => {
@@ -6,7 +6,7 @@ module.exports = app => {
     const student = new Student(payload);
     try {
       await student.save();
-      res.status(200).json(student);
+      res.status(201).json(student);
     } catch (error) {
       res.status(500).json({
         message: error.message
