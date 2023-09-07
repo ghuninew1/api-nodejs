@@ -25,7 +25,7 @@ module.exports = app => {
   });
   app.get('/api/product/:id', async (req, res) => {
     try {
-      const product = await Product.findById(req.params.id);
+      const product = await Product.findOne().findById(req.params.id);
       res.status(200).json(product);
     } catch (error) {
       res.status(500).json({
@@ -36,7 +36,7 @@ module.exports = app => {
   app.put('/api/product/:id', async (req, res) => {
     try {
       const payload = req.body;
-      const product = await Product.findByIdAndUpdate(req.params.id, payload, {
+      const product = await Product.findOne().findByIdAndUpdate(req.params.id, payload, {
         new: true
       });
       res.status(200).json(product);
