@@ -1,14 +1,14 @@
 const mongoose = require("../../services/mongoose.service").mongoose;
 
-const datatestSchema = new mongoose.Schema(
+const visitSchema = new mongoose.Schema(
     {
         name: {
             type: String,
         },
-        alt: {
-            type: String,
+        value: {
+            type: Number,
         },
-        image: {
+        detail: {
             type: String,
         },
     },
@@ -17,4 +17,4 @@ const datatestSchema = new mongoose.Schema(
         versionKey: false,
     }
 );
-module.exports = mongoose.model("Datatest", datatestSchema);
+module.exports = mongoose.model("Visit", visitSchema);

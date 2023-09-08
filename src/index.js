@@ -5,47 +5,44 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+const fs = require("fs");
+const { Server } = require("socket.io");
 
 // const flash = require("express-flash");
-const session = require("express-session");
+// const session = require("express-session");
 
-const studentRoute = require("./api/student");
-const productRoute = require("./api/products");
-const datatestRoute = require("./api/datatest");
-const resTime = require("./common/middlewares/resTime");
+const visitRoute = require("./api/routes/visit");
+const productRoute = require("./api/routes/products");
+const datatestRoute = require("./api/routes/datatest");
+const authRoute = require("./api/routes/auth");
+const resTime = require("./services/resTime");
+const ioRoute = require("./services/ws");
+const dbRoute = require("./api/db");
 
-// const AuthorizationRouter = require('./authorization/routes.config');
-// const UsersRouter = require('./users/routes.config');
+const PORT = process.env.PORT || 3001;
+const unixSocket = "/tmp/apignew.sock";
 
 const app = express();
 
 // middlewares
-app.use(express.json());
-app.use(cors({ origin: "*"}));
+app.use(bodyParser.json());
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(logger("dev"));
+
+let accessLogStream = fs.createWriteStream(path.join(__dirname, "access.log"), {
+    encoding: "utf8",
+});
+app.use(
+    logger('combined', {
+        stream: accessLogStream,
+        // skip: function (req, res) { return res.statusCode < 400 }
+    })
+);
+
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../public")));
-
-// app.use(session({
-    // name: "ghuniNew",
-//   cookie: { maxAge: 60 },
-//   store: new session.MemoryStore,
-//   saveUninitialized: true,
-//   resave: 'true',
-//   secret: 'secret'
-// }))
-app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-  secret: 'ghuninew test',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true, maxAge: 60 }
-}))
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 
 app.use((req, res, next) => {
     res.header("X-Response-Time", resTime(process.hrtime()) + " ms");
@@ -57,21 +54,30 @@ app.use((req, res, next) => {
     }
 });
 
+// view engine setup
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
+
 app.get("/", (req, res) => {
-    const dataRes = resTime(process.hrtime()) + " ms" 
-    const result =[dataRes, req.sessionID, req.session.cookie.maxAge]
-    res.render('index', {title: "GNEW", maindata: "GhuniNew", secdata: result});
+    const dataRes = resTime(process.hrtime()) + " ms";
+    res.render("index", {
+        title: "GNEW",
+        maindata: dataRes,
+        people: req.ip,
+    });
 });
 
-app.route
+app.get("/ws", (req, res) => {
+    const dataRes = resTime(process.hrtime()) + " ms";
+    res.render("ws", { title: "GNEW", maindata: dataRes });
+});
 
 // routes Api
-studentRoute(app);
+visitRoute(app);
 productRoute(app);
 datatestRoute(app);
-
-// AuthorizationRouter.routesConfig(app);
-// UsersRouter.routesConfig(app);
+authRoute(app);
+dbRoute(app);
 
 // catch 404 and forward to error handler
 app.use(function (req, res) {
@@ -85,6 +91,35 @@ app.use(function (err, req, res) {
 });
 
 const server = http.createServer(app);
-server.listen(3000, function () {
-    console.log(`app running on http://localhost:${server.address().port}`);
+
+server.listen(PORT, () => {
+    console.log(`app running on http://localhost:${PORT}`);
 });
+
+const unix = http.createServer(app);
+
+if (fs.existsSync(unixSocket)) {
+    fs.rm(unixSocket, (err) => {
+        unix.listen(unixSocket, () => {
+            fs.chmodSync(unixSocket, "777");
+            console.log(`app running on socket ${unixSocket}`);
+        });
+        if (err) {
+            console.error(err);
+        }
+    });
+} else {
+    unix.listen(unixSocket, () => {
+        fs.chmodSync(unixSocket, "777");
+        console.log(`app running on socket ${unixSocket}`);
+    });
+}
+
+// const io = new Server(server);
+const io = new Server(server, {
+    transports: ["polling", "websocket", "xhr-polling", "jsonp-polling"],
+  });
+  
+ioRoute(io);
+
+module.exports = app;

@@ -1,12 +1,14 @@
-const mongoose = require('../../common/services/mongoose.service').mongoose;
+const mongoose = require("../../services/mongoose.service").mongoose;
 
-const { Schema } = mongoose;
-const productSchema = new Schema({
-  prod_name: String,
-  prod_desc: String,
-  prod_price: Number
-}, {
-  timestamps: true,
-  versionKey: false
-});
-module.exports = mongoose.model('Product', productSchema);
+const productSchema = new mongoose.Schema(
+    {
+        prod_name: String,
+        prod_desc: String,
+        prod_price: Number,
+    },
+    {
+        timestamps: true,
+        versionKey: false,
+    }
+);
+module.exports = mongoose.model("Product", productSchema);
