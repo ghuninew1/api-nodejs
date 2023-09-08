@@ -5,6 +5,7 @@
 }
 body{
     font-family: 'Roboto', sans-serif;
+    font-size: 14px;
 }
 
 main {
@@ -23,7 +24,6 @@ main {
 }
 .head{
     font-size: 1rem;
-    font-weight: 700;
     margin-bottom: 2rem;
     text-align: center;
 }
@@ -36,7 +36,7 @@ main {
     height: 50px;
 }
 .sec button {
-    margin: 0 1rem;
+    margin: 0 0.5rem;
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 5px;
@@ -74,7 +74,7 @@ table{
 table tr td{
     padding:0.1rem 0.5rem;
     border: 1px solid #cccccc16;
-    font-size: 14px;
+    font-size: 13px;
 }
 table tr td:nth-child(1){
     width: 20%;

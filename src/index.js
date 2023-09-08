@@ -7,9 +7,10 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const fs = require("fs");
 const { Server } = require("socket.io");
+const { instrument } = require("@socket.io/admin-ui");
 
 // const flash = require("express-flash");
-// const session = require("express-session");
+const session = require("express-session");
 
 const visitRoute = require("./api/routes/visit");
 const productRoute = require("./api/routes/products");
@@ -25,8 +26,8 @@ const unixSocket = "/tmp/apignew.sock";
 const app = express();
 
 // middlewares
-app.use(bodyParser.json());
-app.use(cors({ origin: "*" }));
+app.use(bodyParser.json({extended: true}));
+app.use(cors({ origin: "*" , credentials: true}));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(logger("dev"));
@@ -35,7 +36,7 @@ let accessLogStream = fs.createWriteStream(path.join(__dirname, "access.log"), {
     encoding: "utf8",
 });
 app.use(
-    logger('combined', {
+    logger("combined", {
         stream: accessLogStream,
         // skip: function (req, res) { return res.statusCode < 400 }
     })
@@ -117,9 +118,34 @@ if (fs.existsSync(unixSocket)) {
 
 // const io = new Server(server);
 const io = new Server(server, {
-    transports: ["polling", "websocket", "xhr-polling", "jsonp-polling"],
-  });
-  
-ioRoute(io);
+    pingInterval: 300,
+    pingTimeout: 200,
+    maxPayload: 1000000,
+    transports: [ "websocket", "polling" ],
+    cors: { 
+        origin: "*",
+        allowedHeaders: "*",
+        credentials: true,
+    }
+});
+
+io.engine.use(
+    session({
+        secret: "ghuninew gnew",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: true },
+    })
+);
+
+// instrument(io, {
+//     auth: {
+//       type: 'basic',
+//       username: "admin1",
+//       password: "bbpadmin2022" // "changeit" encrypted with bcrypt
+//     },
+//   });
+
+ioRoute(io)
 
 module.exports = app;

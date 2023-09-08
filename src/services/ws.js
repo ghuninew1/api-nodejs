@@ -30,5 +30,9 @@ module.exports = io => {
                 clearInterval();
             }
         });
+
+        socket.on("ping", (callback) => {
+            callback();
+        });
     });
 };

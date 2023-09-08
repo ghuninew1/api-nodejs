@@ -13,52 +13,50 @@
         <main>
             <div class="head">
                 <div><%= maindata %></div>
-                <p>Status: <span id="status">Disconnected</span><span id="statuscol"></span></p>
+                <p>Status: <span id="status">Disconnected</span><span id="statuscol" class="offline"></span></p>
                 <p>Transport: <span id="transport">N/A</span></p>
                 <p id="time"></p>
-                <p id="cpu"></p>
+                <p id="res"></p>
             </div>
             <div class="sec">
+                <button id="wsconnect" type="button" title="Connect">Connect</button>
                 <button id="wsSendButton" type="button" title="Send WebSocket message">Send</button>
                 <button id="login" type="button" title="Simulate login">login</button>
                 <button id="logout" type="button" title="Simulate logout">logout</button>
                 <pre id="messages" style="height: 400px; overflow: scroll"></pre>
-    
             </div>
             <div class="main">
                 <table>
                     <thead>
-                      <tr>
-                      </tr>
+                        <tr></tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>RSS</td>
-                        <td id="rss"></td>
-                      </tr>
-                      <tr>
-                        <td>Heap total</td>
-                        <td id="heapTotal"></td>
-                      </tr>
-                      <tr>
-                        <td>Heap used</td>
-                        <td id="heapUsed"></td>
-                      </tr>
-                      <tr>
-                        <td>External</td>
-                        <td id="external"></td>
-                      </tr>
-                      <tr>
-                        <td>User</td>
-                        <td id="user"></td>
-                      </tr>
-                      <tr>
-                        <td>System</td>
-                        <td id="system"></td>
-                      </tr>
+                        <tr>
+                            <td>RSS</td>
+                            <td id="rss"></td>
+                        </tr>
+                        <tr>
+                            <td>Heap total</td>
+                            <td id="heapTotal"></td>
+                        </tr>
+                        <tr>
+                            <td>Heap used</td>
+                            <td id="heapUsed"></td>
+                        </tr>
+                        <tr>
+                            <td>External</td>
+                            <td id="external"></td>
+                        </tr>
+                        <tr>
+                            <td>User</td>
+                            <td id="user"></td>
+                        </tr>
+                        <tr>
+                            <td>System</td>
+                            <td id="system"></td>
+                        </tr>
                     </tbody>
-                  </table>
-    
+                </table>
             </div>
         </main>
         <script src="/socket.io/socket.io.min.js"></script>
@@ -66,17 +64,26 @@
             const $status = document.getElementById("status");
             const $transport = document.getElementById("transport");
 
-            const statuscol = document.querySelector('#statuscol')
+            const statuscol = document.querySelector("#statuscol");
+            const wsconnect = document.querySelector("#wsconnect");
 
-            const socket = io();
+            wsconnect.onclick = () => {
+                Websockets();
+            };
+
+            const Websockets = ()=>{
+
+            const socket = io({
+                transports: ["websocket"],
+            });
 
             socket.on("connect", () => {
-                console.log(`connected with transport ${socket.io.engine.transport.name}`);
+                console.log(`connected with transport ${socket.io.engine.transport.name} `);
 
                 $status.innerText = "Connected";
                 $transport.innerText = socket.io.engine.transport.name;
-                statuscol.classList.add('online')
-                statuscol.classList.remove('offline')
+                statuscol.classList.add("online");
+                statuscol.classList.remove("offline");
 
                 socket.io.engine.on("upgrade", (transport) => {
                     console.log(`transport upgraded to ${transport.name}`);
@@ -94,47 +101,55 @@
 
                 $status.innerText = "Disconnected";
                 $transport.innerText = "N/A";
-                statuscol.classList.add('offline')
-                statuscol.classList.remove('online')
+                statuscol.classList.add("offline");
+                statuscol.classList.remove("online");
             });
 
             socket.on("message", (data) => {
-                const rss = document.getElementById('rss');
-                const heapTotal = document.getElementById('heapTotal');
-                const heapUsed = document.getElementById('heapUsed');
-                const external = document.getElementById('external');
-                const user = document.getElementById('user');
-                const system = document.getElementById('system');
+                const rss = document.getElementById("rss");
+                const heapTotal = document.getElementById("heapTotal");
+                const heapUsed = document.getElementById("heapUsed");
+                const external = document.getElementById("external");
+                const user = document.getElementById("user");
+                const system = document.getElementById("system");
 
-                
-                rss.textContent = fomateNum(data.memory.rss) + ' MB'
-                heapTotal.textContent = fomateNum(data.memory.heapTotal) + ' MB'
-                heapUsed.textContent = fomateNum(data.memory.heapUsed) + ' MB'
-                external.textContent = fomateNum(data.memory.external) + ' MB'
-                user.textContent = secNSec2ms(data.cpus.user) + ' ms'
-                system.textContent = secNSec2ms(data.cpus.system) + ' ms'
-                document.getElementById('time').textContent = new Date().toLocaleString('th')
-
-
+                rss.textContent = fomateNum(data.memory.rss) + " MB";
+                heapTotal.textContent = fomateNum(data.memory.heapTotal) + " MB";
+                heapUsed.textContent = fomateNum(data.memory.heapUsed) + " MB";
+                external.textContent = fomateNum(data.memory.external) + " MB";
+                user.textContent = secNSec2ms(data.cpus.user) + " ms";
+                system.textContent = secNSec2ms(data.cpus.system) + " ms";
+                document.getElementById("time").textContent = new Date().toLocaleString("th");
             });
 
             document.getElementById("wsSendButton").addEventListener("click", () => {
-                socket.send({msg:"click"})
+                socket.send({ msg: "click" });
             });
 
             document.getElementById("login").addEventListener("click", () => {
-                socket.connect()
+                socket.connect();
             });
             document.getElementById("logout").addEventListener("click", () => {
-                socket.close()
+                socket.close();
             });
-            const fomateNum = (num ) => Number(num /1000000).toFixed(2)
+            const fomateNum = (num) => Number(num / 1000000).toFixed(2);
             const secNSec2ms = (secNSec) => {
-                 if (Array.isArray(secNSec)) {
-                    secNSec[0] * 1000 + secNSec[1] / 1000000
-                 } 
-                    return secNSec / 1000
-            }
+                if (Array.isArray(secNSec)) {
+                    secNSec[0] * 1000 + secNSec[1] / 1000000;
+                }
+                return secNSec / 1000;
+            };
+
+            setInterval(() => {
+                const start = Date.now();
+
+                socket.emit("ping", () => {
+                    const duration = Date.now() - start;
+                    document.getElementById("res").textContent = duration + " ms";
+                    // console.log(duration);
+                });
+            }, 5000);
+            };
         </script>
     </body>
 </html>
