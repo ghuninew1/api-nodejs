@@ -2,9 +2,20 @@ const mongoose = require("../../services/mongoose.service").mongoose;
 
 const productSchema = new mongoose.Schema(
     {
-        prod_name: String,
-        prod_desc: String,
-        prod_price: Number,
+        name: {
+            type: String,
+            required: true,
+        },
+        detail: {
+            type: String
+        },
+        price: {
+            type: Number
+        },
+        file: {
+            type: String,
+            default: 'image.jpg'
+        }
     },
     {
         timestamps: true,
