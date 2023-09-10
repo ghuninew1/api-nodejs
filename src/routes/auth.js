@@ -1,5 +1,5 @@
 
-const { register, login } = require('../Users')
+const { register, login } = require('../api/Users')
 
 module.exports = app => {
 

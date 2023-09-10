@@ -1,55 +1,55 @@
-const Product = require('../models/Product');
+const Visit = require("../api/models/Visit");
 
 module.exports = (app) => {
-    app.post("/api/product", async (req, res) => {
+    app.post("/api/visits", async (req, res) => {
         const payload = req.body;
-        const product = new Product(payload);
+        const visits = new Visit(payload);
         try {
-            await product.save();
-            res.status(201).json(product);
+            await visits.save();
+            res.status(201).json(visits);
         } catch (error) {
             res.status(500).json({
                 message: error.message,
             });
         }
     });
-    app.get("/api/product", async (req, res) => {
+    app.get("/api/visits", async (req, res) => {
         try {
-            const product = await Product.find({});
-            res.status(200).json(product);
+            const visitss = await Visit.find({});
+            res.status(200).json(visitss);
         } catch (error) {
             res.status(500).json({
                 message: error.message,
             });
         }
     });
-    app.get("/api/product/:id", async (req, res) => {
+    app.get("/api/visits/:id", async (req, res) => {
         try {
-            const product = await Product.findById(req.params.id);
-            res.status(200).json(product);
+            const visits = await Visit.findById(req.params.id);
+            res.status(200).json(visits);
         } catch (error) {
             res.status(500).json({
                 message: error.message,
             });
         }
     });
-    app.put("/api/product/:id", async (req, res) => {
+    app.put("/api/visits/:id", async (req, res) => {
         try {
             const payload = req.body;
-            const product = await Product.findByIdAndUpdate(req.params.id, payload, {
+            const visits = await Visit.findByIdAndUpdate(req.params.id, payload, {
                 new: true,
             });
-            res.status(200).json(product);
+            res.status(200).json(visits);
         } catch (error) {
             res.status(500).json({
                 message: error.message,
             });
         }
     });
-    app.delete("/api/product/:id", async (req, res) => {
+    app.delete("/api/visits/:id", async (req, res) => {
         try {
-            const product = await Product.findByIdAndDelete(req.params.id);
-            res.status(200).json(product);
+            const visits = await Visit.findByIdAndDelete(req.params.id);
+            res.status(200).json(visits);
         } catch (error) {
             res.status(500).json({
                 message: error.message,

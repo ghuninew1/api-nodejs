@@ -1,7 +1,7 @@
-const Datatest = require("../models/Datatest");
+const Datatest = require("../api/models/Datatest");
 
 module.exports = (app) => {
-    app.post("/api/datatest", async (req, res) => {
+    app.post("/api/datatests", async (req, res) => {
         const payload = req.body;
         const datatest = new Datatest(payload);
         try {
@@ -13,7 +13,7 @@ module.exports = (app) => {
             });
         }
     });
-    app.get("/api/datatest", async (req, res) => {
+    app.get("/api/datatests", async (req, res) => {
         try {
             const datatest = await Datatest.find({});
             res.status(200).json(datatest);
@@ -23,7 +23,7 @@ module.exports = (app) => {
             });
         }
     });
-    app.get("/api/datatest/:id", async (req, res) => {
+    app.get("/api/datatests/:id", async (req, res) => {
         try {
             const datatest = await Datatest.findById(req.params.id);
             res.status(200).json(datatest);
@@ -33,7 +33,7 @@ module.exports = (app) => {
             });
         }
     });
-    app.put("/api/datatest/:id", async (req, res) => {
+    app.put("/api/datatests/:id", async (req, res) => {
         try {
             const payload = req.body;
             const datatest = await Datatest.findByIdAndUpdate(req.params.id, payload, {
@@ -46,7 +46,7 @@ module.exports = (app) => {
             });
         }
     });
-    app.delete("/api/datatest/:id", async (req, res) => {
+    app.delete("/api/datatests/:id", async (req, res) => {
         try {
             const datatest = await Datatest.findByIdAndDelete(req.params.id);
             res.status(200).json(datatest);

@@ -3,22 +3,22 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const fs = require("fs");
 const { Server } = require("socket.io");
-const { instrument } = require("@socket.io/admin-ui");
+const responseTime = require('response-time')
 
 // const flash = require("express-flash");
-const session = require("express-session");
+// const session = require("express-session");
 
-const visitRoute = require("./api/routes/visit");
-const productRoute = require("./api/routes/products");
-const datatestRoute = require("./api/routes/datatest");
-const authRoute = require("./api/routes/auth");
-const resTime = require("./services/resTime");
+const visitRoute = require("./routes/visit");
+const productRoute = require("./routes/products");
+const datatestRoute = require("./routes/datatest");
+const authRoute = require("./routes/auth");
 const ioRoute = require("./services/ws");
 const dbRoute = require("./api/db");
+const speedtestRoute = require("./routes/speedteest");
 
 const PORT = process.env.PORT || 3001;
 const unixSocket = "/tmp/apignew.sock";
@@ -26,30 +26,19 @@ const unixSocket = "/tmp/apignew.sock";
 const app = express();
 
 // middlewares
-app.use(bodyParser.json({extended: true}));
-app.use(cors({ origin: "*" , credentials: true}));
+app.use(bodyParser.json());
+app.use(cors({ origin: "*", credentials: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(logger("dev"));
 
-let accessLogStream = fs.createWriteStream(path.join(__dirname, "access.log"), {
-    encoding: "utf8",
-});
-app.use(
-    logger("combined", {
-        stream: accessLogStream,
-        // skip: function (req, res) { return res.statusCode < 400 }
-    })
-);
-
-app.use(cookieParser());
+// app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../public")));
 
-app.use((req, res, next) => {
-    res.header("X-Response-Time", resTime(process.hrtime()) + " ms");
+app.use("*", (req, res, next) => {
+    // res.header("X-Response-Time", resTime(Date.now()) + " ms");
     res.header("X-Powered-By", "GhuniNew");
     if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
+        return res.status(500).end();
     } else {
         return next();
     }
@@ -59,19 +48,19 @@ app.use((req, res, next) => {
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.get("/", (req, res) => {
-    const dataRes = resTime(process.hrtime()) + " ms";
-    res.render("index", {
-        title: "GNEW",
-        maindata: dataRes,
-        people: req.ip,
-    });
+app.use('*',responseTime((req, res, time) => {
+    res.header("X-Response-Time", time + " ms");
+    // console.log("res time", time);
+}));
+
+app.get("/", (req, res) => { 
+    res.status(200).json({ message: "GhuniNew API" });
 });
 
-app.get("/ws", (req, res) => {
-    const dataRes = resTime(process.hrtime()) + " ms";
-    res.render("ws", { title: "GNEW", maindata: dataRes });
+app.get("/ws", async (req, res) => {
+    res.render("ws", { title: "GNEW", maindata: "GhuniNew API" });
 });
+
 
 // routes Api
 visitRoute(app);
@@ -79,6 +68,7 @@ productRoute(app);
 datatestRoute(app);
 authRoute(app);
 dbRoute(app);
+speedtestRoute(app);
 
 // catch 404 and forward to error handler
 app.use(function (req, res) {
@@ -118,25 +108,21 @@ if (fs.existsSync(unixSocket)) {
 
 // const io = new Server(server);
 const io = new Server(server, {
-    pingInterval: 300,
-    pingTimeout: 200,
-    maxPayload: 1000000,
-    transports: [ "websocket", "polling" ],
-    cors: { 
+    transports: ["websocket", "polling"],
+    cors: {
         origin: "*",
-        allowedHeaders: "*",
         credentials: true,
-    }
+    },
 });
 
-io.engine.use(
-    session({
-        secret: "ghuninew gnew",
-        resave: false,
-        saveUninitialized: true,
-        cookie: { secure: true },
-    })
-);
+// io.engine.use(
+//     session({
+//         secret: "ghuninew gnew",
+//         resave: false,
+//         saveUninitialized: true,
+//         cookie: { secure: true },
+//     })
+// );
 
 // instrument(io, {
 //     auth: {
@@ -146,6 +132,6 @@ io.engine.use(
 //     },
 //   });
 
-ioRoute(io)
+ioRoute(io);
 
 module.exports = app;

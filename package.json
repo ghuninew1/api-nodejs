@@ -7,7 +7,7 @@
   "author": "GhuniNew",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/index",
+    "dev": "open -u http://localhost:3001 && nodemon src/index ",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install && npm run build",
     "pm2": "pm2 start src/index.js --name api-nodejs",
     "start": "node src/index.js"
@@ -27,6 +27,7 @@
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "response-time": "^2.3.2"
   }
 }
