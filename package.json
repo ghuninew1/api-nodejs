@@ -1,6 +1,6 @@
 {
   "name": "@ghuninew1/api-nodejs",
-  "version": "1.1.1",
+  "version": "1.1.0",
   "description": "Nothing",
   "main": "src/index.js",
   "type": "commonjs",
