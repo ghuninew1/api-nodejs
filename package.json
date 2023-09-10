@@ -1,13 +1,14 @@
 {
   "name": "@ghuninew1/api-nodejs",
   "version": "1.1.0",
-  "description": "Nothing",
+  "description": "",
   "main": "src/index.js",
   "type": "commonjs",
   "author": "GhuniNew",
   "license": "MIT",
   "scripts": {
-    "dev": "open -u http://localhost:3001 && nodemon src/index ",
+    "dev": "nodemon src/index.js",
+    "open": "open http://localhost:3001",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install && npm run build",
     "pm2": "pm2 start src/index.js --name api-nodejs",
     "start": "node src/index.js"
@@ -20,7 +21,6 @@
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
-    "@socket.io/admin-ui": "^0.5.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "ejs": "^3.1.9",
