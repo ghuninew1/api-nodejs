@@ -11,7 +11,6 @@ const responseTime = require('response-time');
 const authRoute = require("./routes/auth");
 const ioRoute = require("./services/ws");
 const apiRoute = require("./routes/api");
-const speedtestRoute = require("./routes/speedteest");
 
 const PORT = process.env.PORT || 3001;
 const unixSocket = "/tmp/apignew.sock";
@@ -48,7 +47,6 @@ app.get("/ws", async (req, res) => {
 // routes Api
 authRoute(app);
 apiRoute(app);
-speedtestRoute(app);
 
 // catch 404 and forward to error handler
 app.use((req, res)=> {
