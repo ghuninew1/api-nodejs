@@ -12,7 +12,6 @@ const authRoute = require("./routes/auth");
 const ioRoute = require("./services/ws");
 const apiRoute = require("./routes/api");
 const speedtestRoute = require("./routes/speedteest");
-const createIOServer = require("./api/controllers/hostip");
 
 const PORT = process.env.PORT || 3001;
 const unixSocket = "/tmp/apignew.sock";
@@ -30,11 +29,11 @@ app.use(cors({ origin: "*"}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "../public")));
+
 app.use('*',responseTime((req, res, time) => {
     res.header("X-Response-Time", time + " ms");
     res.header("X-Powered-By", "GhuniNew");
 }));
-
 
 
 //root route
@@ -50,7 +49,6 @@ app.get("/ws", async (req, res) => {
 authRoute(app);
 apiRoute(app);
 speedtestRoute(app);
-// hostip(app);
 
 // catch 404 and forward to error handler
 app.use((req, res)=> {
@@ -97,7 +95,5 @@ const io = new Server(server, {
     },
 });
 ioRoute(io);
-createIOServer(io);
 
 module.exports = app;
-exports.io = io;

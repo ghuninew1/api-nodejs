@@ -17,47 +17,40 @@
                     ><span id="statuscol" class="offline"></span>
                 </p>
                 <p>Transport: <span id="transport">N/A</span></p>
-                <p id="time"></p>
                 <p id="res"></p>
             </div>
             <div class="sec">
                 <button id="wsconnect" type="button" title="Connect">Connect</button>
-                <button id="wsSendButton" type="button" title="Send WebSocket message">Send</button>
-                <button id="login" type="button" title="Simulate login">login</button>
-                <button id="logout" type="button" title="Simulate logout">logout</button>
-                <button id="ping" type="button" title="Simulate ping">ping</button>
-                <button id="cpu" type="button" title="Simulate cpu">cpu</button>
-                <button id="memory" type="button" title="Simulate memory">memory</button>
-                <pre id="messages" style="height: 400px; overflow: scroll"></pre>
+                <button id="logout" type="button" title="Simulate logout">Close</button>
+                <button id="wsping" type="button" title="Simulate ping">Ping</button>
+                <button id="wsstatus" type="button" title="Simulate cpu">Status</button>
             </div>
             <div class="main">
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>IP</th>
-                            <th>Status</th>
-                            <th>Response</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
                         </tr>
                     </thead>
-                    <tbody id="table">
-                        <tr>
-                            <td id="td1">1</td>
-                            <td id="td2"> 1</td>
-                            <td id="td3">   1 </td>
-                            <td id="td4">  1  </td>
-                            <td id="td5">  1  </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="table"></tbody>
                 </table>
+                <div class="list">
+                    <ul >
+                        <li id="system"></li>
+                        <li id="user"></li>
+                    </ul>
+                </div>
+
             </div>
         </main>
         <script src="/socket.io/socket.io.min.js"></script>
         <script>
             const $status = document.getElementById("status");
             const $transport = document.getElementById("transport");
-
             const statuscol = document.querySelector("#statuscol");
             const wsconnect = document.querySelector("#wsconnect");
 
@@ -85,88 +78,71 @@
                     });
                 });
 
+                socket.on("message", (data) => {
+                    console.log("message", data);   
+                });
                 socket.on("connect_error", (err) => {
                     console.log(`connect_error due to ${err.message}`);
                 });
 
                 socket.on("disconnect", (reason) => {
                     console.log(`disconnect due to ${reason}`);
-
                     $status.innerText = "Disconnected";
                     $transport.innerText = "N/A";
                     statuscol.classList.add("offline");
                     statuscol.classList.remove("online");
                 });
 
-                socket.on("message", (data) => {
-                    console.log("message", data);
-                    const time = document.getElementById("time");
-                    time.textContent = data.data;
-                });
-
                 socket.on("nodeStatus", (data) => {
-                    const { id,name,ip,status,res } = data;
-                    const table = document.getElementById("table");
-                    const row = table.insertRow(1);
-                    const td1 = row.insertCell(0);
-                    const td2 = row.insertCell(1);
-                    const td3 = row.insertCell(2);
-                    const td4 = row.insertCell(3);
-                    const td5 = row.insertCell(4);
-                    td1.innerHTML = id;
-                    td2.innerHTML = name;
-                    td3.innerHTML = ip;
-                    td4.innerHTML = status;
-                    td5.innerHTML = res;
-
-                    //remove table row > 5
-                    if (table.rows.length > 5) {
-                        table.deleteRow(5);
-                    } else {
-                        console.log("no");
-                    } 
-                });
-                    //remove table row > 5
-                    // if (table.rows.length > 5) {
-                    //     table.deleteRow(1);
-                    // 
-
-
-
-                document.getElementById("wsSendButton").addEventListener("click", () => {
-                    socket.send({ msg: "click" });
+                    if (data) {
+                        const tr = document.createElement("tr");
+                        const td1 = document.createElement("td");
+                        const td2 = document.createElement("td");
+                        const td3 = document.createElement("td");
+                        const td4 = document.createElement("td");
+                        const td5 = document.createElement("td");
+                        td1.textContent = data.id;
+                        td2.textContent = data.name;
+                        td3.textContent = data.ip;
+                        td4.textContent = data.status;
+                        td5.textContent = data.res;
+                        tr.appendChild(td1);
+                        tr.appendChild(td2);
+                        tr.appendChild(td3);
+                        tr.appendChild(td4);
+                        tr.appendChild(td5);
+                        document.getElementById("table").appendChild(tr);
+                        // replace table row > 5
+                        if (document.getElementById("table").rows.length > 5) {
+                            document.getElementById("table").deleteRow(1);
+                        }
+                    }
                 });
 
-                document.getElementById("login").addEventListener("click", () => {
-                    socket.connect();
-                });
-                document.getElementById("logout").addEventListener("click", () => {
+                const wslohout = document.querySelector("#logout");
+                const wsstatus = document.querySelector("#wsstatus");
+                const wsping = document.querySelector("#wsping");
+
+                wslohout.onclick = () => {
                     socket.close();
-                });
-                document.getElementById("ping").addEventListener("click", () => {
+                };
+                wsstatus.onclick = () => {
+                    checkStatus();
+                };
+                wsping.onclick = () => {
                     checkPing();
-                });
-                document.getElementById("cpu").addEventListener("click", () => {
-                    ckeckCpu();
-                });
+                };
 
                 const fomateNum = (num) => Number(num).toFixed(2);
 
-                const ckeckCpu = () => {
-                    setInterval(() => {
-                        socket.emit("cpu", (data, now) => {
-                            const user = document.getElementById("user");
-                            const system = document.getElementById("system");
-                            const elapTime = data.user + data.system;
-                            const elapTimeMS = new Date().getTime() - now;
-                            const cpuPercent = (elapTime / elapTimeMS) * 0.1;
-                            user.textContent = data.system + " : " + data.user;
-                            system.textContent = fomateNum(cpuPercent) + "%";
-                        });
-                    }, 1000);
+                socket.on("cpu", (data) => {
+                    const user = document.querySelector("#user");
+                    const system = document.querySelector("#system");
+                    user.textContent = "user: " + fomateNum(data.user) + "%";
+                    system.textContent = "system: " + fomateNum(data.system) + "%";
+                });
 
-                    clearInterval();
-                };
+                // };
                 // socket.emit("memory", (data) => {
                 //     const rss = document.getElementById("rss");
                 //     const heapTotal = document.getElementById("heapTotal");
@@ -178,19 +154,12 @@
                 //     external.textContent = fomateNum(data.external) + " MB";
                 // });
                 const checkPing = () => {
-                    setInterval(() => {
-                        socket.emit("ping", async (startTime) => {
-                            const duration = await new Promise((resolve) => {
-                                setTimeout(() => {
-                                    const endTime = (new Date().getTime() - startTime) / 1000;
-                                    resolve(endTime);
-                                }, 1000);
-                                clearTimeout();
-                            });
-                            document.getElementById("res").textContent = Number(duration) + " ms";
-                        });
-                    }, 1000);
-                    clearInterval();
+                    console.log("ping");
+                    socket.emit("ping", "pingg");
+                };
+                const checkStatus = () => {
+                    console.log("status");
+                    socket.emit("status", "status");
                 };
             };
         </script>
