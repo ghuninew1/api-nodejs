@@ -12,17 +12,11 @@ const authRoute = require("./routes/auth");
 const ioRoute = require("./services/ws");
 const apiRoute = require("./routes/api");
 const speedtestRoute = require("./routes/speedteest");
-const createIOServer = require("./api/controllers/hostip");
 
 const PORT = process.env.PORT || 3001;
 const unixSocket = "/tmp/apignew.sock";
 
 const app = express();
-
-// view engine setup
-app.set("views", path.join(__dirname, "../public"));
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html');
 
 // middlewares
 app.use(bodyParser.json());
@@ -35,7 +29,10 @@ app.use('*',responseTime((req, res, time) => {
     res.header("X-Powered-By", "GhuniNew");
 }));
 
-
+// view engine setup
+app.set("views", path.join(__dirname, "../public"));
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html');
 
 //root route
 app.get("/", (req, res) => { 
@@ -50,17 +47,16 @@ app.get("/ws", async (req, res) => {
 authRoute(app);
 apiRoute(app);
 speedtestRoute(app);
-// hostip(app);
 
 // catch 404 and forward to error handler
 app.use((req, res)=> {
-    res.status(404).json({ url: req.originalUrl + " not found @GhuniNew" });
+    res.status(404).send({ url: req.originalUrl + " not found @GhuniNew" });
 });
 
 // error handler
 app.use((err, req, res)=> {
     console.error(err.stack);
-    res.status(500).json({ message: "Server Error @GhuniNew" });
+    res.status(500).send("Something broke! @GhuniNew");
 });
 
 // http server
@@ -97,7 +93,5 @@ const io = new Server(server, {
     },
 });
 ioRoute(io);
-createIOServer(io);
 
 module.exports = app;
-exports.io = io;
