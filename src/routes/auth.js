@@ -1,5 +1,5 @@
 
-const { register, login } = require('../api/Users')
+const { register, login } = require('../api/controllers/auth')
 
 module.exports = (app) => {
     app.post('/register', register)

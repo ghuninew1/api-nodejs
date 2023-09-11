@@ -13,21 +13,12 @@ const options = {
 const connectWithRetry = async () => {
     console.log('MongoDB connection with retry '+count)
     await mongoose.connect("mongodb://mongo.bigbrain-studio.com", options).then(()=>{
-        console.log({
-            status: "connected"+" V."+mongoose.version,
-            DBname: mongoose.connection.name,
-            Host: mongoose.connection.host+':'+mongoose.connection.port,
-            model: mongoose.modelNames(),
-        })
+        console.log( "status: connected  V." + mongoose.version + " DBname: " + mongoose.connection.name + " Host: " + mongoose.connection.host + ':' + mongoose.connection.port + " Model: " + mongoose.modelNames())
     }).catch(err=>{
-        console.log({
-            status: "error",
-            error: err,
-            "message":' retry after 5 seconds '+count,
-        })
+        console.log( "status: error" +  "error: " + err + "message : retry after 5 seconds " + count)
+        count++
         setTimeout(connectWithRetry, 5000)
     })
-    
 };
 
 connectWithRetry();
