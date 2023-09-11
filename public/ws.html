@@ -33,21 +33,32 @@
             <div class="main">
                 <table>
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>IP</th>
-                            <th>Status</th>
-                            <th>Response</th>
-                        </tr>
+                        <tr></tr>
                     </thead>
-                    <tbody id="table">
+                    <tbody>
                         <tr>
-                            <td id="td1">1</td>
-                            <td id="td2"> 1</td>
-                            <td id="td3">   1 </td>
-                            <td id="td4">  1  </td>
-                            <td id="td5">  1  </td>
+                            <td>RSS</td>
+                            <td id="rss"></td>
+                        </tr>
+                        <tr>
+                            <td>Heap total</td>
+                            <td id="heapTotal"></td>
+                        </tr>
+                        <tr>
+                            <td>Heap used</td>
+                            <td id="heapUsed"></td>
+                        </tr>
+                        <tr>
+                            <td>External</td>
+                            <td id="external"></td>
+                        </tr>
+                        <tr>
+                            <td>User</td>
+                            <td id="user"></td>
+                        </tr>
+                        <tr>
+                            <td>System</td>
+                            <td id="system"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -104,35 +115,6 @@
                     time.textContent = data.data;
                 });
 
-                socket.on("nodeStatus", (data) => {
-                    const { id,name,ip,status,res } = data;
-                    const table = document.getElementById("table");
-                    const row = table.insertRow(1);
-                    const td1 = row.insertCell(0);
-                    const td2 = row.insertCell(1);
-                    const td3 = row.insertCell(2);
-                    const td4 = row.insertCell(3);
-                    const td5 = row.insertCell(4);
-                    td1.innerHTML = id;
-                    td2.innerHTML = name;
-                    td3.innerHTML = ip;
-                    td4.innerHTML = status;
-                    td5.innerHTML = res;
-
-                    //remove table row > 5
-                    if (table.rows.length > 5) {
-                        table.deleteRow(5);
-                    } else {
-                        console.log("no");
-                    } 
-                });
-                    //remove table row > 5
-                    // if (table.rows.length > 5) {
-                    //     table.deleteRow(1);
-                    // 
-
-
-
                 document.getElementById("wsSendButton").addEventListener("click", () => {
                     socket.send({ msg: "click" });
                 });
@@ -167,16 +149,16 @@
 
                     clearInterval();
                 };
-                // socket.emit("memory", (data) => {
-                //     const rss = document.getElementById("rss");
-                //     const heapTotal = document.getElementById("heapTotal");
-                //     const heapUsed = document.getElementById("heapUsed");
-                //     const external = document.getElementById("external");
-                //     rss.textContent = fomateNum(data.rss) + " MB";
-                //     heapTotal.textContent = fomateNum(data.heapTotal) + " MB";
-                //     heapUsed.textContent = fomateNum(data.heapUsed) + " MB";
-                //     external.textContent = fomateNum(data.external) + " MB";
-                // });
+                socket.emit("memory", (data) => {
+                    const rss = document.getElementById("rss");
+                    const heapTotal = document.getElementById("heapTotal");
+                    const heapUsed = document.getElementById("heapUsed");
+                    const external = document.getElementById("external");
+                    rss.textContent = fomateNum(data.rss) + " MB";
+                    heapTotal.textContent = fomateNum(data.heapTotal) + " MB";
+                    heapUsed.textContent = fomateNum(data.heapUsed) + " MB";
+                    external.textContent = fomateNum(data.external) + " MB";
+                });
                 const checkPing = () => {
                     setInterval(() => {
                         socket.emit("ping", async (startTime) => {
