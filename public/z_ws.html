@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-icon-180x180.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <title>Web Socket</title>
+        <link rel="stylesheet" href="/css/mycss.css" />
+    </head>
+    <body>
+        <main>
+            <div class="head">
+                <p>
+                    Status: <span id="status">Disconnected</span
+                    ><span id="statuscol" class="offline"></span>
+                </p>
+                <p>Transport: <span id="transport">N/A</span></p>
+                <p id="res"></p>
+            </div>
+            <div class="sec">
+                <button id="wsconnect" type="button" title="Connect">Connect</button>
+                <button id="logout" type="button" title="Simulate logout">Close</button>
+                <button id="wsping" type="button" title="Simulate ping">Ping</button>
+                <button id="wsstatus" type="button" title="Simulate cpu">Status</button>
+            </div>
+            <div class="main">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table"></tbody>
+                </table>
+                <div class="list">
+                    <ul >
+                        <li id="system"></li>
+                        <li id="user"></li>
+                    </ul>
+                </div>
+
+            </div>
+        </main>
+        <script src="/socket.io/socket.io.min.js"></script>
+        <script>
+            const $status = document.getElementById("status");
+            const $transport = document.getElementById("transport");
+            const statuscol = document.querySelector("#statuscol");
+            const wsconnect = document.querySelector("#wsconnect");
+
+            wsconnect.onclick = () => {
+                Websockets();
+            };
+
+            const Websockets = () => {
+                const socket = io({
+                    path: "/ws",
+                    transports: ["websocket"],
+                });
+
+                socket.on("connect", () => {
+                    console.log(`connected with transport ${socket.io.engine.transport.name} `);
+
+                    $status.innerText = "Connected";
+                    $transport.innerText = socket.io.engine.transport.name;
+                    statuscol.classList.add("online");
+                    statuscol.classList.remove("offline");
+
+                    socket.io.engine.on("upgrade", (transport) => {
+                        console.log(`transport upgraded to ${transport.name}`);
+
+                        $transport.innerText = transport.name;
+                    });
+                });
+
+                socket.on("message", (data) => {
+                    console.log("message", data);   
+                });
+                socket.on("connect_error", (err) => {
+                    console.log(`connect_error due to ${err.message}`);
+                });
+
+                socket.on("disconnect", (reason) => {
+                    console.log(`disconnect due to ${reason}`);
+                    $status.innerText = "Disconnected";
+                    $transport.innerText = "N/A";
+                    statuscol.classList.add("offline");
+                    statuscol.classList.remove("online");
+                });
+
+                socket.on("nodeStatus", (data) => {
+                    if (data) {
+                        const tr = document.createElement("tr");
+                        const td1 = document.createElement("td");
+                        const td2 = document.createElement("td");
+                        const td3 = document.createElement("td");
+                        const td4 = document.createElement("td");
+                        const td5 = document.createElement("td");
+                        td1.textContent = data.id;
+                        td2.textContent = data.name;
+                        td3.textContent = data.ip;
+                        td4.textContent = data.status;
+                        td5.textContent = data.res;
+                        tr.appendChild(td1);
+                        tr.appendChild(td2);
+                        tr.appendChild(td3);
+                        tr.appendChild(td4);
+                        tr.appendChild(td5);
+                        document.getElementById("table").appendChild(tr);
+  
+                        if (document.getElementById("table").rows.length > 5) {
+                            document.getElementById("table").deleteRow(1);
+                        }
+                    }
+                });
+
+                const wslohout = document.querySelector("#logout");
+                const wsstatus = document.querySelector("#wsstatus");
+                const wsping = document.querySelector("#wsping");
+
+                wslohout.onclick = () => {
+                    socket.close();
+                };
+                wsstatus.onclick = () => {
+                    checkStatus();
+                };
+                wsping.onclick = () => {
+                    checkPing();
+                };
+
+                const fomateNum = (num) => Number(num).toFixed(2);
+
+                socket.on("cpu", (data) => {
+                    const user = document.querySelector("#user");
+                    const system = document.querySelector("#system");
+                    user.textContent = "user: " + fomateNum(data.user) + "%";
+                    system.textContent = "system: " + fomateNum(data.system) + "%";
+                });
+
+                // };
+                // socket.emit("memory", (data) => {
+                //     const rss = document.getElementById("rss");
+                //     const heapTotal = document.getElementById("heapTotal");
+                //     const heapUsed = document.getElementById("heapUsed");
+                //     const external = document.getElementById("external");
+                //     rss.textContent = fomateNum(data.rss) + " MB";
+                //     heapTotal.textContent = fomateNum(data.heapTotal) + " MB";
+                //     heapUsed.textContent = fomateNum(data.heapUsed) + " MB";
+                //     external.textContent = fomateNum(data.external) + " MB";
+                // });
+                const checkPing = () => {
+                    console.log("ping");
+                    socket.emit("ping", "pingg");
+                };
+                const checkStatus = () => {
+                    console.log("status");
+                    socket.emit("status", "status");
+                };
+            };
+        </script>
+    </body>
+</html>

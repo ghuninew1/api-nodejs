@@ -1,6 +1,6 @@
 {
   "name": "@ghuninew1/api-nodejs",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "",
   "main": "server.js",
   "type": "commonjs",
@@ -17,13 +17,16 @@
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "mongoose": "^7.5.0",
+    "mongoose": "^7.5.1",
+    "pidusage": "^3.0.2",
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
+    "@types/node": "^20.6.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "ejs": "^3.1.9",
+    "event-loop-stats": "^1.4.1",
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",

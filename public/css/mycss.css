@@ -7,32 +7,47 @@ body{
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
 }
-
 main {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.main {
+    display: flex;
     justify-content: center;
     align-items: center;
     margin: 10px;
     padding: 0;
-    height: 100%;
+    outline: none;
 }
-.main {
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-}
-.head{
-    font-size: 1rem;
-    margin-bottom: 2rem;
+ #status, #transport{
+    margin: 5px;
     text-align: center;
+    padding: 0.5rem;
+    font-size: 15px;
+}
+.header {
+    font-size: 1rem;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0;
+}
+.header div{
+    margin: 5px auto;
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 15px;
 }
 .sec{
     margin: 0 auto;
-    padding: 0;
+    padding: 10px;
     display: flex;
     align-items: start;
     justify-content: center;
-    height: 50px;
+    height: auto;
 }
 .sec button {
     margin: 0 0.5rem;
@@ -62,41 +77,4 @@ button:hover {
     display: inline-block;
     border-radius: 100%;
     margin: 0 10px;
-}
-table{
-    border-collapse: collapse;
-    align-items: center;
-    margin: 0 auto;
-}
-table tr td{
-    padding:0.1rem 0.5rem;
-    border: 1px solid #cccccc16;
-    font-size: 13px;
-}
-table tr td:nth-child(1){
-    width: 20%;
-    text-align: end;
-}
-table tr td:nth-child(2){
-    width: 20%;
-    text-align: start;
-}
-table tr td:nth-child(3){
-    width: 20%;
-}
-table tr td:nth-child(4){
-    width: 20%;
-}
-table tr td:nth-child(5){
-    width: 20%;
-}
-.list{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10px auto;
-    font-size: 13px;
-}
-li {
-    list-style: none;
 }

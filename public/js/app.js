@@ -4,7 +4,7 @@
 */
 /* global Chart, location, document, port, socketPath, parseInt, io */
 
-// 'use strict';
+'use strict';
 
 Chart.defaults.global.defaultFontSize = 8;
 Chart.defaults.global.animation.duration = 500;
@@ -13,12 +13,58 @@ Chart.defaults.global.elements.line.backgroundColor = 'rgba(0,0,0,0)';
 Chart.defaults.global.elements.line.borderColor = 'rgba(0,0,0,0.9)';
 Chart.defaults.global.elements.line.borderWidth = 2;
 
-// var socket = io(location.protocol + '//' + location.hostname + ':' + (port || location.port), {
-  // var socket = io({
-  // path: socketPath,
-  // path: socketPath,
-//   transports: ["websocket"],
-// });
+  const $status = document.getElementById("status");
+  const $transport = document.getElementById("transport");
+  const statuscol = document.querySelector("#statuscol");
+  const wsconnect = document.querySelector("#wsconnect");
+  
+wsconnect.onclick = () => {
+  Websockets();
+};
+
+const Websockets = () => {
+  const socket = io({
+      path: "/ws",
+      transports: ["websocket"],
+  });
+
+  socket.on("connect", () => {
+      console.log(`connected with transport ${socket.io.engine.transport.name} `);
+      $status.innerText = "Connected";
+      $transport.innerText = socket.io.engine.transport.name;
+      statuscol.classList.add("online");
+      statuscol.classList.remove("offline");
+
+      socket.io.engine.on("upgrade", (transport) => {
+          console.log(`transport upgraded to ${transport.name}`);
+
+          $transport.innerText = transport.name;
+      });
+  });
+
+  socket.on("message", (data) => {
+      console.log("message", data);
+  });
+  socket.on("connect_error", (err) => {
+      console.log(`connect_error due to ${err.message}`);
+  });
+
+  socket.on("disconnect", (reason) => {
+      console.log(`disconnect due to ${reason}`);
+      $status.innerText = "Disconnected";
+      $transport.innerText = "N/A";
+      statuscol.classList.add("offline");
+      statuscol.classList.remove("online");
+  });
+
+  const wslohout = document.querySelector("#logout");
+  const wsstatus = document.querySelector("#wsstatus");
+  const wsping = document.querySelector("#wsping");
+
+  wslohout.onclick = () => {
+      socket.close();
+  };
+
 
 var defaultSpan = 0;
 var spans = [];
@@ -337,3 +383,4 @@ socket.on('esm_stats', function (data) {
     });
   }
 });
+}
