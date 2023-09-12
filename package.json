@@ -2,16 +2,16 @@
   "name": "@ghuninew1/api-nodejs",
   "version": "1.1.1",
   "description": "",
-  "main": "src/server.js",
+  "main": "server.js",
   "type": "commonjs",
   "author": "GhuniNew",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/server.js",
+    "dev": "nodemon server.js",
     "open": "open http://localhost:3001",
     "postbuild": "NPM_CONFIG_PRODUCTION=false npm install && npm run build",
     "pm2": "pm2 start src/index.js --name api-nodejs",
-    "start": "node src/server.js"
+    "dev2": "nodemon --exec bun server.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -29,7 +29,6 @@
     "morgan": "^1.10.0",
     "multer": "1.4.5-lts.1",
     "nodemon": "^3.0.1",
-    "ping": "^0.4.4",
-    "response-time": "^2.3.2"
+    "ping": "^0.4.4"
   }
 }

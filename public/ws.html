@@ -60,6 +60,7 @@
 
             const Websockets = () => {
                 const socket = io({
+                    path: "/ws",
                     transports: ["websocket"],
                 });
 

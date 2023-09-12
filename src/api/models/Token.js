@@ -1,13 +1,10 @@
 const mongoose = require('../../services/mongoose.service').mongoose;
 
 const { Schema } = mongoose;
-const userSchema = new Schema({
+const tokenSchema = new Schema({
     name: {
         type: String
       },
-    password: {
-        type: String
-    },
     token: {
         type: String
     },
@@ -16,4 +13,4 @@ const userSchema = new Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Users', userSchema)
+module.exports = mongoose.model('Token', tokenSchema)

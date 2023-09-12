@@ -5,38 +5,33 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const morgan = require("morgan");
 const fs = require("fs");
-const { Server } = require("socket.io");
-const responseTime = require('response-time');
+// const { Server } = require("socket.io");
 
-const authRoute = require("./routes/auth");
-const ioRoute = require("./services/ws");
-const apiRoute = require("./routes/api");
+const config = require("./config");
+const authRoute = require("./src/routes/auth");
+const apiRoute = require("./src/routes/api");
+const socketIoInit = require("./src/services/ws");
 
-const PORT = process.env.PORT || 3001;
+const PORT = config.port;
 const unixSocket = "/tmp/apignew.sock";
 
 const app = express();
 
 // view engine setup
-app.set("views", path.join(__dirname, "../public"));
+app.set("views", path.join(__dirname, "./public"));
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 // middlewares
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb", extended: true}));
 app.use(cors({ origin: "*"}));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(morgan("dev"));
-app.use(express.static(path.join(__dirname, "../public")));
-
-app.use('*',responseTime((req, res, time) => {
-    res.header("X-Response-Time", time + " ms");
-    res.header("X-Powered-By", "GhuniNew");
-}));
-
+app.use(express.static(path.join(__dirname, "./public")));
 
 //root route
 app.get("/", (req, res) => { 
+    res.header("X-Powered-By", "GhuniNew");
     res.status(200).json({ HOME: "API @GhuniNew" });
 });
 
@@ -59,12 +54,6 @@ app.use((err, req, res)=> {
     res.status(500).json({ message: "Server Error @GhuniNew" });
 });
 
-// http server
-const server = http.createServer(app);
-server.listen(PORT, () => {
-    console.log(`app running on http://localhost:${PORT}`);
-});
-
 //unix socket
 const unix = http.createServer(app);
 if (fs.existsSync(unixSocket)) {
@@ -84,14 +73,11 @@ if (fs.existsSync(unixSocket)) {
     });
 }
 
-// socket io
-const io = new Server(server, {
-    transports: ["websocket", "polling"],
-    cors: {
-        origin: "*",
-        credentials: true,
-    },
+// http server
+const server = http.createServer(app);
+server.listen(PORT, () => {
+    console.log(`app running on http://localhost:${PORT}`);
 });
-ioRoute(io);
+socketIoInit(server);
 
 module.exports = app;
