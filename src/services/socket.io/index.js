@@ -1,17 +1,18 @@
 const { Server } = require("socket.io");
-const gatherOsMetrics = require("./gather-os-metrics");
-const onHeadersListener = require("./on-headers-listener");
+const gatherOsMetrics = require("./osMetrics");
+const pingCheck = require("./pingCheck");
 
 let io;
 
 const addSocketEvents = (socket, config) => {
+
     socket.emit("esm_start", config.spans);
     socket.on("esm_change", () => {
         socket.emit("esm_start", config.spans);
     });
 };
 
-module.exports = socketIoInit = (server, config) => {
+module.exports = socketIoInit = (server, config, statuscode) => {
     if (io === null || io === undefined) {
         io = new Server(server, {
             path: "/ws",
@@ -36,11 +37,9 @@ module.exports = socketIoInit = (server, config) => {
                 console.log(`disconnected due to ${reason}` + " : " + socket.id);
             });
             addSocketEvents(socket, config);
+            pingCheck(socket, statuscode);
         });
-        const spans = config.spans;
-
-        
-        spans.forEach((span) => {
+        return config.spans.forEach((span) => {
             span.os = [];
             span.responses = [];
             const interval = setInterval(() => gatherOsMetrics(io, span), span.interval * 1000);
@@ -48,13 +47,7 @@ module.exports = socketIoInit = (server, config) => {
             interval.unref();
         });
 
-        const onHeaders = (res) => {
-        const startTime = process.hrtime();
-        onHeadersListener( res, startTime, spans);
-        };
-
-        server.on("request", onHeaders);
-
+        // const spans = config.spans;
     } else {
         console.log("Socket.io already initialized");
     }

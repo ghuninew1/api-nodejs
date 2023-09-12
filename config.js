@@ -18,5 +18,5 @@ module.exports = {
             interval: 15,
             retention: 60,
         },
-    ],
+    ],    
 };

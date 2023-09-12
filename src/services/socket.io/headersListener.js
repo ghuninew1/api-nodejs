@@ -10,6 +10,7 @@ module.exports = (statusCode, startTime, spans) => {
             last[category] += 1;
             last.count += 1;
             last.mean += (responseTime - last.mean) / last.count;
+            console.log("last",last)
         } else {
             span.responses.push({
                 2: category === 2 ? 1 : 0,
@@ -18,8 +19,10 @@ module.exports = (statusCode, startTime, spans) => {
                 5: category === 5 ? 1 : 0,
                 count: 1,
                 mean: responseTime,
-                timestamp: Date.now(),
+                timestamp: Date.now(), 
             });
+            console.log("span",span)
+            
         }
     });
 };

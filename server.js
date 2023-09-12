@@ -9,7 +9,7 @@ const fs = require("fs");
 const config = require("./config");
 const authRoute = require("./src/routes/auth");
 const apiRoute = require("./src/routes/api");
-const socketIoInit = require("./src/services/ws");
+const socketIoInit = require("./src/services/socket.io/index");
 
 const PORT = config.port;
 const unixSocket = config.unix_socket;
@@ -79,4 +79,4 @@ server.listen(PORT, () => {
     console.log(`app running on http://localhost:${PORT}`);
 });
 
-socketIoInit(server, config);
+socketIoInit(server, config, app.response.statusCode);
