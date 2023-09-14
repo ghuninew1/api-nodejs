@@ -1,7 +1,7 @@
 // import { useState } from 'react'
 import {  createBrowserRouter, RouterProvider, Outlet  } from 'react-router-dom'
 import './App.css'
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 import StudentList from './pages/api1/ApiCrud'
 import NavBar from './components/NavBar'
 import Themes from './components/Themes'

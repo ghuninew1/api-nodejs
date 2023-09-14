@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema(
         },
         file: {
             type: String,
-            default: 'image.jpg'
+            default: 'noimage.jpg'
         }
     },
     {

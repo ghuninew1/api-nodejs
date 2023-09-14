@@ -8,8 +8,12 @@ const datatestSchema = new mongoose.Schema(
         alt: {
             type: String,
         },
-        image: {
+        url: {
             type: String,
+        },
+        file: {
+            type: String,
+            default: 'noimage.jpg',
         },
     },
     {

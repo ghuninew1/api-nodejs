@@ -15,7 +15,7 @@ const options = {
 const connectWithRetry = async () => {
     console.log('MongoDB connection with retry '+count)
     await mongoose.connect(config.mongo_uri, options).then(()=>{
-        console.log( "status: connected  V." + mongoose.version + " DBname: " + mongoose.connection.name + " Host: " + mongoose.connection.host + ':' + mongoose.connection.port + " Model: " + mongoose.modelNames())
+        console.log( "status: connected  V." + mongoose.version + " DBname: " + mongoose.connection.name  + " Model: " + mongoose.modelNames())
     }).catch(err=>{
         console.log( "status: error" +  "error: " + err + "message : retry after 5 seconds " + count)
         count++

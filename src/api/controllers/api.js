@@ -4,13 +4,14 @@ const products = require("../models/Product");
 const visits = require("../models/Visit");
 const users = require("../models/Users");
 const hostips = require("../models/HostIP");
+const fs = require("fs");
 
-const nameDb = {
-    users: "users",
-    datatests: "datatests",
-    products: "products",
-    visits: "visits",
-    hostips: "hostips",
+const dbName = {
+    users: users,
+    datatests: datatests,
+    products: products,
+    visits: visits,
+    hostips: hostips,
 };
 const db = mongoose.connection;
 exports.findAll = async (req, res) => {
@@ -35,48 +36,41 @@ exports.findAll = async (req, res) => {
         });
         res.status(200).json(result);
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: err.message });
     }
 };
 
 exports.findOne = async (req, res) => {
-    const name = req.params.name;
-    if (nameDb[name]) {
-        const data = await db.db.collection(name).find({}).toArray();
-        res.status(200).json(data);
-    } else {
-        res.status(404).json({ message: "Not Found" });
+    try {
+        const name = req.params.name;
+        if (dbName[name]) {
+            const data = await db.db.collection(name).find({}).toArray();
+            data ? res.status(200).json(data) : res.status(404).json({ message: "Find Fail" });
+        } else {
+            res.status(404).json({ message: "Not Found" });
+        }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
 exports.findById = async (req, res) => {
     try {
         const name = req.params.name;
-        if (nameDb[name]) {
+        if (dbName[name]) {
             const id = req.params.id;
-            const models = (name) => {
-                switch (name) {
-                    case "users":
-                        return users.findById(id).exec();
-                    case "datatests":
-                        return datatests.findById(id).exec();
-                    case "products":
-                        return products.findById(id).exec();
-                    case "visits":
-                        return visits.findById(id).exec();
-                    case "hostips":
-                        return hostips.findById(id).exec();
-                    default:
-                        return db.db.collection(name).find({}).toArray();
-                }
-            };
-            res.status(200).json(await models(name));
+            dbName[name]
+                .findById({ _id: id })
+                .exec()
+                .then((data) => {
+                    data
+                        ? res.status(200).json(data)
+                        : res.status(404).json({ message: "Find Fail" });
+                });
         } else {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: err.message });
     }
 };
@@ -84,40 +78,18 @@ exports.findById = async (req, res) => {
 exports.createByName = async (req, res) => {
     try {
         const name = req.params.name;
-        if (nameDb[name]) {
+        if (dbName[name]) {
             const data = req.body;
-            const models = async (name) => {
-                switch (name) {
-                    case "users":
-                        const user = new users(data);
-                        await user.save();
-                        return user;
-                    case "datatests":
-                        const datatest = new datatests(data);
-                        await datatest.save();
-                        return datatest;
-                    case "products":
-                        const product = new products(data);
-                        await product.save();
-                        return product;
-                    case "visits":
-                        const visit = new visits(data);
-                        await visit.save();
-                        return visit;
-                    case "hostips":
-                        const hostip = new hostips(data);
-                        await hostip.save();
-                        return hostip;
-                    default:
-                        return db.db.collection(name).insertOne(data);
-                }
-            };
-            res.status(201).json({ message: "Create Success", data: await models(name) });
+            if (req.file) {
+                data.file = req.file.filename;
+            }
+            const fileCreate = new dbName[name](data);
+            await fileCreate.save();
+            res.status(201).json({ message: "Create Success" });
         } else {
-            res.status(404).json({ message: "Not Found" });
+            res.status(404).json({ message: "Not Create" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: err.message });
     }
 };
@@ -125,56 +97,31 @@ exports.createByName = async (req, res) => {
 exports.updateByid = async (req, res) => {
     try {
         const name = req.params.name;
-        if (nameDb[name]) {
+        if (dbName[name]) {
             const data = req.body;
             const id = req.params.id;
-            const models = async (name) => {
-                switch (name) {
-                    case "users":
-                        const user = await users
-                            .findByIdAndUpdate(id, data, {
-                                new: true,
-                            })
-                            .exec();
-                        return user;
-                    case "datatests":
-                        const datatest = await datatests
-                            .findByIdAndUpdate(id, data, {
-                                new: true,
-                            })
-                            .exec();
-                        return datatest;
-                    case "products":
-                        const product = await products
-                            .findByIdAndUpdate(id, data, {
-                                new: true,
-                            })
-                            .exec();
-                        return product;
-                    case "visits":
-                        const visit = await visits
-                            .findByIdAndUpdate(id, data, {
-                                new: true,
-                            })
-                            .exec();
-                        return visit;
-                    case "hostips":
-                        const hostip = await hostips
-                            .findByIdAndUpdate(id, data, {
-                                new: true,
-                            })
-                            .exec();
-                        return hostip;
-                    default:
-                        return db.db.collection(name).updateOne({ _id: id }, { $set: data });
-                }
-            };
-            res.status(200).json({ message: "Update Success", data: await models(name) });
+            if (req.file) {
+                data.file = req.file.filename;
+            }
+            const fileUpdate = await dbName[name].findOneAndUpdate({ _id: id }, data).exec();
+            if (fileUpdate?.file) {
+                fs.unlinkSync(`./uploads/${fileUpdate.file}`, (err) => {
+                    if (err) {
+                        res.status(500).json({ message: err.message });
+                    }
+                });
+                fileUpdate
+                    ? res.status(200).json({ message: "Update Success" })
+                    : res.status(404).json({ message: "Update Fail" });
+            } else {
+                fileUpdate
+                    ? res.status(200).json({ message: "Update Success" })
+                    : res.status(404).json({ message: "Update Fail" });
+            }
         } else {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: err.message });
     }
 };
@@ -182,35 +129,27 @@ exports.updateByid = async (req, res) => {
 exports.deleteByid = async (req, res) => {
     try {
         const name = req.params.name;
-        if (nameDb[name]) {
+        if (dbName[name]) {
             const id = req.params.id;
-            const models = async (name) => {
-                switch (name) {
-                    case "users":
-                        const user = await users.findByIdAndDelete(id).exec();
-                        return user;
-                    case "datatests":
-                        const datatest = await datatests.findByIdAndDelete(id).exec();
-                        return datatest;
-                    case "products":
-                        const product = await products.findByIdAndDelete(id).exec();
-                        return product;
-                    case "visits":
-                        const visit = await visits.findByIdAndDelete(id).exec();
-                        return visit;
-                    case "hostips":
-                        const hostip = await hostips.findByIdAndDelete(id).exec();
-                        return hostip;
-                    default:
-                        return db.db.collection(name).deleteOne({ _id: id });
-                }
-            };
-            res.status(204).json({ message: "Delete Success", data: await models(name) });
+            const fileRemove = await dbName[name].findOneAndDelete({ _id: id }).exec();
+            if (fileRemove?.file) {
+                fs.unlinkSync(`./uploads/${fileRemove.file}`, (err) => {
+                    if (err) {
+                        res.status(500).json({ message: err.message });
+                    }
+                });
+                fileRemove
+                    ? res.status(200).json({ message: "Delete Success" })
+                    : res.status(404).json({ message: "Delete Fail" });
+            } else {
+                fileRemove
+                    ? res.status(200).json({ message: "Delete Success" })
+                    : res.status(404).json({ message: "Delete Fail" });
+            }
         } else {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: err.message });
     }
 };
@@ -218,34 +157,16 @@ exports.deleteByid = async (req, res) => {
 exports.deleteAll = async (req, res) => {
     try {
         const name = req.params.name;
-        if (nameDb[name]) {
+        if (dbName[name]) {
             const models = async (name) => {
-                switch (name) {
-                    case "users":
-                        const user = await users.deleteMany({}).exec();
-                        return user;
-                    case "datatests":
-                        const datatest = await datatests.deleteMany({}).exec();
-                        return datatest;
-                    case "products":
-                        const product = await products.deleteMany({}).exec();
-                        return product;
-                    case "visits":
-                        const visit = await visits.deleteMany({}).exec();
-                        return visit;
-                    case "hostips":
-                        const hostip = await hostips.deleteMany({}).exec();
-                        return hostip;
-                    default:
-                        return db.db.collection(name).deleteMany({});
-                }
+                db.db.collection(name).drop();
             };
-            res.status(204).json({ message: "Delete All", data: await models(name) });
+            await models(name);
+            res.status(200).json({ message: "Delete Success" });
         } else {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: err.message });
     }
 };

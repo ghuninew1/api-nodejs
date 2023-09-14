@@ -1,19 +1,20 @@
+"use strict";
 
-
-// "use strict";
-
-Chart.defaults.global.defaultFontSize = 12;
+Chart.defaults.global.defaultFontSize = 8;
 Chart.defaults.global.animation.duration = 500;
 Chart.defaults.global.legend.display = false;
 Chart.defaults.global.elements.line.backgroundColor = "rgba(0,0,0,0)";
-Chart.defaults.global.elements.line.borderColor = "rgba(0,0,0,0.9)";
-Chart.defaults.global.elements.line.borderWidth = 2;
+Chart.defaults.global.elements.line.borderColor = "rgba(0,0,9,9.9)";
+Chart.defaults.global.elements.line.borderWidth = 1;
+Chart.defaults.global.elements.point.radius = 5;
 
 const $status = document.getElementById("status");
 const $transport = document.getElementById("transport");
 const statuscol = document.querySelector("#statuscol");
 const wsconnect = document.querySelector("#wsconnect");
-const dataStatus = document.querySelector("#datastatus")
+const dataStatus = document.querySelector("#datastatus");
+const wslohout = document.querySelector("#logout");
+const wsstatus = document.querySelector("#wsstatus");
 
 wsconnect.onclick = () => {
     Websockets();
@@ -22,27 +23,32 @@ wsconnect.onclick = () => {
 const Websockets = () => {
     const socket = io({
         path: "/ws",
-        transports: ["websocket"],
+        transports: ["websocket", "polling", "webtransport"],
         cors: "*",
     });
 
     socket.on("connect", () => {
-        console.log(`connected with transport ${socket.io.engine.transport.name} `);
+        const transport = socket.io.engine.transport.name;
+
+        socket.io.engine.on("upgrade", () => {
+            const upgradedTransport = socket.io.engine.transport.name;
+            if (transport !== upgradedTransport) {
+                console.log(`Socket upgraded from ${transport} to ${upgradedTransport}`);
+            }
+            console.log("Socket upgraded");
+        });
+        console.log("Socket connected: " + socket.id);
         $status.innerText = "Connected";
         $transport.innerText = socket.io.engine.transport.name;
         statuscol.classList.add("online");
         statuscol.classList.remove("offline");
 
-        socket.io.engine.on("upgrade", (transport) => {
-            console.log(`transport upgraded to ${transport.name}`);
-
-            $transport.innerText = transport.name;
-        });
+        wsstatus.onclick = () => {
+            socket.emit("status");
+            socket.emit("esm_on");
+        };
     });
 
-    // socket.on("message", (data) => {
-    //     console.log("message", data);
-    // });
     socket.on("connect_error", (err) => {
         console.log(`connect_error due to ${err.message}`);
     });
@@ -53,10 +59,10 @@ const Websockets = () => {
         $transport.innerText = "N/A";
         statuscol.classList.add("offline");
         statuscol.classList.remove("online");
+
     });
 
-    const wslohout = document.querySelector("#logout");
-    const wsstatus = document.querySelector("#wsstatus");
+
 
     wslohout.onclick = () => {
         socket.close();
@@ -71,6 +77,9 @@ const Websockets = () => {
         data: [],
         lineTension: 0.2,
         pointRadius: 0,
+        borderColor: "#000777",
+        borderWidth: 1,
+        fill: false,
     };
 
     let defaultOptions = {
@@ -285,7 +294,7 @@ const Websockets = () => {
         let spanControls = document.getElementById("span-controls");
 
         if (data.length !== spans.length) {
-           await data.forEach(function (span, index) {
+            await data.forEach(function (span, index) {
                 spans.push({
                     retention: span.retention,
                     interval: span.interval,
@@ -303,10 +312,7 @@ const Websockets = () => {
         }
     });
     socket.on("nodeStatus", async (data) => {
-
-            ( dataStatus.innerText =JSON.stringify(data) )      
-  
-        
+        dataStatus.innerText = JSON.stringify(data);
     });
     socket.on("esm_stats", async function (data) {
         // console.log("stats", data);
@@ -388,9 +394,6 @@ const Websockets = () => {
                 chart.update();
             });
 
-            wsstatus.onclick = () => {
-                socket.emit("status");
-            };
 
         }
     });

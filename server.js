@@ -54,18 +54,16 @@ app.use((err, req, res) => {
 //unix socket
 const unix = http.createServer(app);
 if (fs.existsSync(config.unix_socket)) {
-    fs.rm(config.unix_socket, (err) => {
-        unix.listen(config.unix_socket, () => {
-            fs.chmodSync(config.unix_socket, "775");
-            console.log(`app running on socket ${config.unix_socket}`);
-        });
+    fs.unlink(config.unix_socket, (err) => {
         if (err) {
             console.error(err);
         }
+        unix.listen(config.unix_socket, () => {
+            console.log(`app running on socket ${config.unix_socket}`);
+        });
     });
 } else {
     unix.listen(config.unix_socket, () => {
-        fs.chmodSync(config.unix_socket, "775");
         console.log(`app running on socket ${config.unix_socket}`);
     });
 }
