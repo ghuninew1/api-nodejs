@@ -1,8 +1,3 @@
-/*
-  eslint-disable no-plusplus, no-var, strict, vars-on-top, prefer-template,
-  func-names, prefer-arrow-callback, no-loop-func
-*/
-/* global Chart, location, document, port, socketPath, parseInt, io */
 
 
 // "use strict";
@@ -67,18 +62,18 @@ const Websockets = () => {
         socket.close();
     };
 
-    var defaultSpan = 0;
-    var spans = [];
-    var statusCodesColors = ["#75D701", "#47b8e0", "#ffc952", "#E53A40"];
+    let defaultSpan = 0;
+    let spans = [];
+    let statusCodesColors = ["#75D701", "#47b8e0", "#ffc952", "#E53A40"];
 
-    var defaultDataset = {
+    let defaultDataset = {
         label: "",
         data: [],
         lineTension: 0.2,
         pointRadius: 0,
     };
 
-    var defaultOptions = {
+    let defaultOptions = {
         scales: {
             yAxes: [
                 {
@@ -107,7 +102,7 @@ const Websockets = () => {
         animation: false,
     };
 
-    var createChart = function (ctx, dataset) {
+    let createChart = function (ctx, dataset) {
         return new Chart(ctx, {
             type: "line",
             data: {
@@ -118,43 +113,43 @@ const Websockets = () => {
         });
     };
 
-    var addTimestamp = function (point) {
+    let addTimestamp = function (point) {
         return point.timestamp;
     };
 
-    var cpuDataset = [Object.create(defaultDataset)];
-    var memDataset = [Object.create(defaultDataset)];
-    var loadDataset = [Object.create(defaultDataset)];
-    var heapDataset = [Object.create(defaultDataset)];
-    var eventLoopDataset = [Object.create(defaultDataset)];
-    var responseTimeDataset = [Object.create(defaultDataset)];
-    var rpsDataset = [Object.create(defaultDataset)];
+    let cpuDataset = [Object.create(defaultDataset)];
+    let memDataset = [Object.create(defaultDataset)];
+    let loadDataset = [Object.create(defaultDataset)];
+    let heapDataset = [Object.create(defaultDataset)];
+    let eventLoopDataset = [Object.create(defaultDataset)];
+    let responseTimeDataset = [Object.create(defaultDataset)];
+    let rpsDataset = [Object.create(defaultDataset)];
 
-    var cpuStat = document.getElementById("cpuStat");
-    var memStat = document.getElementById("memStat");
-    var loadStat = document.getElementById("loadStat");
-    var heapStat = document.getElementById("heapStat");
-    var eventLoopStat = document.getElementById("eventLoopStat");
-    var responseTimeStat = document.getElementById("responseTimeStat");
-    var rpsStat = document.getElementById("rpsStat");
+    let cpuStat = document.getElementById("cpuStat");
+    let memStat = document.getElementById("memStat");
+    let loadStat = document.getElementById("loadStat");
+    let heapStat = document.getElementById("heapStat");
+    let eventLoopStat = document.getElementById("eventLoopStat");
+    let responseTimeStat = document.getElementById("responseTimeStat");
+    let rpsStat = document.getElementById("rpsStat");
 
-    var cpuChartCtx = document.getElementById("cpuChart");
-    var memChartCtx = document.getElementById("memChart");
-    var loadChartCtx = document.getElementById("loadChart");
-    var heapChartCtx = document.getElementById("heapChart");
-    var eventLoopChartCtx = document.getElementById("eventLoopChart");
-    var responseTimeChartCtx = document.getElementById("responseTimeChart");
-    var rpsChartCtx = document.getElementById("rpsChart");
-    var statusCodesChartCtx = document.getElementById("statusCodesChart");
+    let cpuChartCtx = document.getElementById("cpuChart");
+    let memChartCtx = document.getElementById("memChart");
+    let loadChartCtx = document.getElementById("loadChart");
+    let heapChartCtx = document.getElementById("heapChart");
+    let eventLoopChartCtx = document.getElementById("eventLoopChart");
+    let responseTimeChartCtx = document.getElementById("responseTimeChart");
+    let rpsChartCtx = document.getElementById("rpsChart");
+    let statusCodesChartCtx = document.getElementById("statusCodesChart");
 
-    var cpuChart = createChart(cpuChartCtx, cpuDataset);
-    var memChart = createChart(memChartCtx, memDataset);
-    var heapChart = createChart(heapChartCtx, heapDataset);
-    var eventLoopChart = createChart(eventLoopChartCtx, eventLoopDataset);
-    var loadChart = createChart(loadChartCtx, loadDataset);
-    var responseTimeChart = createChart(responseTimeChartCtx, responseTimeDataset);
-    var rpsChart = createChart(rpsChartCtx, rpsDataset);
-    var statusCodesChart = new Chart(statusCodesChartCtx, {
+    let cpuChart = createChart(cpuChartCtx, cpuDataset);
+    let memChart = createChart(memChartCtx, memDataset);
+    let heapChart = createChart(heapChartCtx, heapDataset);
+    let eventLoopChart = createChart(eventLoopChartCtx, eventLoopDataset);
+    let loadChart = createChart(loadChartCtx, loadDataset);
+    let responseTimeChart = createChart(responseTimeChartCtx, responseTimeDataset);
+    let rpsChart = createChart(rpsChartCtx, rpsDataset);
+    let statusCodesChart = new Chart(statusCodesChartCtx, {
         type: "line",
         data: {
             labels: [],
@@ -172,7 +167,7 @@ const Websockets = () => {
         dataset.borderColor = statusCodesColors[index];
     });
 
-    var charts = [
+    let charts = [
         cpuChart,
         memChart,
         loadChart,
@@ -183,13 +178,13 @@ const Websockets = () => {
         eventLoopChart,
     ];
 
-    var onSpanChange = async function (e) {
+    let onSpanChange = async function (e) {
         e.target.classList.add("active");
         defaultSpan = parseInt(e.target.id, 10);
 
-        var otherSpans = document.getElementsByTagName("span");
+        let otherSpans = document.getElementsByTagName("span");
 
-        for (var i = 0; i < otherSpans.length; i++) {
+        for (let i = 0; i < otherSpans.length; i++) {
             if (otherSpans[i] !== e.target) otherSpans[i].classList.remove("active");
         }
 
@@ -203,7 +198,7 @@ const Websockets = () => {
         data[defaultSpan].os.pop();
         // console.log("start", data);
 
-        var lastOsMetric = data[defaultSpan].os[data[defaultSpan].os.length - 1];
+        let lastOsMetric = data[defaultSpan].os[data[defaultSpan].os.length - 1];
 
         cpuStat.textContent = "0.0%";
         if (lastOsMetric) {
@@ -248,7 +243,7 @@ const Websockets = () => {
         });
         eventLoopChart.data.labels = data[defaultSpan].os.map(addTimestamp);
 
-        var lastResponseMetric =
+        let lastResponseMetric =
             data[defaultSpan].responses[data[defaultSpan].responses.length - 1];
 
         responseTimeStat.textContent = "0.00ms";
@@ -261,7 +256,7 @@ const Websockets = () => {
         });
         responseTimeChart.data.labels = data[defaultSpan].responses.map(addTimestamp);
 
-        for (var i = 0; i < 4; i++) {
+        for (let i = 0; i < 4; i++) {
             statusCodesChart.data.datasets[i].data = data[defaultSpan].responses.map(function (
                 point
             ) {
@@ -271,7 +266,7 @@ const Websockets = () => {
         statusCodesChart.data.labels = data[defaultSpan].responses.map(addTimestamp);
 
         if (data[defaultSpan].responses.length >= 2) {
-            var deltaTime =
+            let deltaTime =
                 lastResponseMetric.timestamp -
                 data[defaultSpan].responses[data[defaultSpan].responses.length - 2].timestamp;
 
@@ -287,7 +282,7 @@ const Websockets = () => {
             chart.update();
         });
 
-        var spanControls = document.getElementById("span-controls");
+        let spanControls = document.getElementById("span-controls");
 
         if (data.length !== spans.length) {
            await data.forEach(function (span, index) {
@@ -296,8 +291,8 @@ const Websockets = () => {
                     interval: span.interval,
                 });
 
-                var spanNode = document.createElement("span");
-                var textNode = document.createTextNode((span.retention * span.interval) / 60 + "M"); // eslint-disable-line
+                let spanNode = document.createElement("span");
+                let textNode = document.createTextNode((span.retention * span.interval) / 60 + "M"); // eslint-disable-line
 
                 spanNode.appendChild(textNode);
                 spanNode.setAttribute("id", index);
@@ -320,8 +315,8 @@ const Websockets = () => {
             data.retention === spans[defaultSpan].retention &&
             data.interval === spans[defaultSpan].interval
         ) {
-            var os = data.os;
-            var responses = data.responses;
+            let os = data.os;
+            let responses = data.responses;
 
             cpuStat.textContent = "0.0%";
             if (os) {
@@ -366,7 +361,7 @@ const Websockets = () => {
             }
 
             if (responses) {
-                var deltaTime =
+                let deltaTime =
                     responses.timestamp - rpsChart.data.labels[rpsChart.data.labels.length - 1];
 
                 if (deltaTime < 1) deltaTime = 1000;
@@ -376,7 +371,7 @@ const Websockets = () => {
             }
 
             if (responses) {
-                for (var i = 0; i < 4; i++) {
+                for (let i = 0; i < 4; i++) {
                     statusCodesChart.data.datasets[i].data.push(data.responses[i + 2]);
                 }
                 statusCodesChart.data.labels.push(data.responses.timestamp);

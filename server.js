@@ -6,13 +6,10 @@ const path = require("path");
 const morgan = require("morgan");
 const fs = require("fs");
 
-const config = require("./config");
+const config = require("./src/services/config");
 const authRoute = require("./src/routes/auth");
 const apiRoute = require("./src/routes/api");
 const socketIoInit = require("./src/services/socket.io/index");
-
-const PORT = config.port;
-const unixSocket = config.unix_socket;
 
 const app = express();
 
@@ -56,27 +53,27 @@ app.use((err, req, res) => {
 
 //unix socket
 const unix = http.createServer(app);
-if (fs.existsSync(unixSocket)) {
-    fs.rm(unixSocket, (err) => {
-        unix.listen(unixSocket, () => {
-            fs.chmodSync(unixSocket, "775");
-            console.log(`app running on socket ${unixSocket}`);
+if (fs.existsSync(config.unix_socket)) {
+    fs.rm(config.unix_socket, (err) => {
+        unix.listen(config.unix_socket, () => {
+            fs.chmodSync(config.unix_socket, "775");
+            console.log(`app running on socket ${config.unix_socket}`);
         });
         if (err) {
             console.error(err);
         }
     });
 } else {
-    unix.listen(unixSocket, () => {
-        fs.chmodSync(unixSocket, "775");
-        console.log(`app running on socket ${unixSocket}`);
+    unix.listen(config.unix_socket, () => {
+        fs.chmodSync(config.unix_socket, "775");
+        console.log(`app running on socket ${config.unix_socket}`);
     });
 }
 
 // http server
 const server = http.createServer(app);
-server.listen(PORT, () => {
-    console.log(`app running on http://localhost:${PORT}`);
+server.listen(config.port, () => {
+    console.log(`app running on http://localhost:${config.port}`);
 });
 
 socketIoInit(server, config, app.response.statusCode);
