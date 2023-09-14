@@ -11,6 +11,9 @@ const userSchema = new Schema({
     token: {
         type: String
     },
+    email: {
+        type: String
+    },
 }, { 
     timestamps: true,
     versionKey: false
