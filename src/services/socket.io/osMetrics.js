@@ -5,6 +5,7 @@ const eventLoopStats = require("event-loop-stats");
 const sendMetrics = require("./sendMetrics");
 
 module.exports = (io, span) => {
+    const starttime = process.hrtime();
     const defaultResponse = {
         2: 0,
         3: 0,
@@ -36,7 +37,15 @@ module.exports = (io, span) => {
         span.os.push(stat);
         if (!span.responses[0] || (last.timestamp + span.interval) * 1000 < Date.now()) {
             span.responses.push(defaultResponse);
+        } else {
+            last.count++;
+            last.mean = last.mean + (stat.cpu - last.mean) / last.count;
+            last[stat.cpu.toString()[0]]++;
         }
+
+        const diff = process.hrtime(starttime);
+        const responseTime = (diff[0] * 1e3 + diff[1]) * 1e-6;
+        span.responses.push(responseTime);
 
         // todo: I think this check should be moved somewhere else
         if (span.os.length >= span.retention) span.os.shift();
