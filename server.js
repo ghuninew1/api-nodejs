@@ -35,7 +35,6 @@ app.use((req, res, next) => {
     res.header("X-Response-Time", `${ms.toFixed(3)} ms`);
     next();
 });
-app.use(visitUpdate);
 
 // routes
 const indexData = async (req, res) => {
@@ -47,7 +46,6 @@ const indexData = async (req, res) => {
         all: visitAll.reduce((acc, cur) => acc + cur.counter, 0),
         index: counter("/"),
         ws: counter("/ws"),
-        api: counter("/api"),
     }
     res.status(200).json({ message: "API GhuniNew", ip: ip, counters: counters });
 };
@@ -57,9 +55,9 @@ const wsData = async (req, res) => {
 };
 
 //root route
-app.get("/", indexData );
+app.get("/",visitUpdate, indexData );
 
-app.get("/ws", wsData);
+app.get("/ws",visitUpdate, wsData);
 
 // routes Api
 authRoute(app);

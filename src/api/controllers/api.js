@@ -1,17 +1,18 @@
 const mongoose = require("../../services/mongoose.service").mongoose;
-const datatests = require("../models/Datatest");
-const products = require("../models/Product");
-const visits = require("../models/Visit");
-const users = require("../models/Users");
-const hostips = require("../models/HostIP");
+const Datatest = require("../models/Datatest");
+const Product = require("../models/Product");
+const Visits = require("../models/Visit");
+const Users = require("../models/Users");
+const Hostip = require("../models/HostIP");
 const fs = require("fs");
+const ping = require("ping");
 
 const dbName = {
-    users: users,
-    datatests: datatests,
-    products: products,
-    visits: visits,
-    hostips: hostips,
+    users: Users,
+    datatest: Datatest,
+    product: Product,
+    visits: Visits,
+    hostip: Hostip,
 };
 const db = mongoose.connection;
 
@@ -20,7 +21,7 @@ exports.findAll = async (req, res) => {
         const dball = async () => {
             const data = await db.db.listCollections().toArray();
             return data;
-        }
+        };
         const data = await dball();
         res.status(200).json(data);
     } catch (err) {
@@ -154,6 +155,59 @@ exports.deleteAll = async (req, res) => {
         } else {
             res.status(404).json({ message: "Not Found" });
         }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+exports.visits = async (req, res) => {
+    try {
+        const url = req.query.url;
+        const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+        const visit = await Visits.findOne({ url: url });
+        const counter = visit ? visit.counter : 0;
+        const dns = require("dns");
+        dns.lookup(url, async (err, address, family) => {
+            if (err) {
+                address = "Not Found";
+                family = "Not Found";
+            }
+            if (url !== "") {
+                if (visit) {
+                    await Visits.updateOne(
+                        { url: url },
+                        { $inc: { counter: 1 } },
+                        { $set: { ip: address } },
+                        { new: true }
+                    );
+                } else {
+                    await Visits.create({ url: url, counter: 1, ip: address });
+                }
+                res.status(200).json({
+                    message: "Visit Success",
+                    ip: ip,
+                    url: url,
+                    address: address,
+                    family: family,
+                    counter: counter,
+                });
+            } else {
+                res.status(404).json({ message: "Not Found please enter url" });
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+exports.pingCheck = async (req, res) => {
+    try {
+        const ip = req.query.ip;
+        const ress = await ping.promise.probe(ip, {
+            timeout: 10,
+            extra: ["-i 2"],
+        });
+        res.status(200).json(ress);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

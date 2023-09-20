@@ -14,6 +14,9 @@ const visitSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        ip: {
+            type: String,
+        },
     },
     schemaOptions);
 const visits = mongoose.model("visits", visitSchema, "visits");

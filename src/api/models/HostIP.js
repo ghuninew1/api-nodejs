@@ -11,6 +11,9 @@ const hostipsSchema = new mongoose.Schema(
         ip: {
             type: String,
         },
+        dns:{
+            type: String,
+        },
         res: {
             type: String,
         },
@@ -20,4 +23,4 @@ const hostipsSchema = new mongoose.Schema(
         versionKey: false,
     }
 );
-module.exports = mongoose.model("Hostip", hostipsSchema);
+module.exports = mongoose.model("hostip", hostipsSchema, "hostip");

@@ -21,4 +21,4 @@ const datatestSchema = new mongoose.Schema(
         versionKey: false,
     }
 );
-module.exports = mongoose.model("Datatest", datatestSchema);
+module.exports = mongoose.model("datatest", datatestSchema, "datatest");
