@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const config = require('./config');
+const mongoose = require("mongoose");
+const config = require("./config");
 let count = 0;
 
 const options = {
@@ -13,14 +13,23 @@ const options = {
 };
 
 const connectWithRetry = async () => {
-    console.log('MongoDB connection with retry '+count)
-    await mongoose.connect(config.mongo_uri, options).then(()=>{
-        console.log( "status: connected  V." + mongoose.version + " DBname: " + mongoose.connection.name  + " Model: " + mongoose.modelNames())
-    }).catch(err=>{
-        console.log( "status: error" +  "error: " + err + "message : retry after 5 seconds " + count)
-        count++
-        setTimeout(connectWithRetry, 5000)
-    })
+    try {
+        console.log("MongoDB connection with retry " + count);
+        await mongoose.connect(config.mongo_uri, options).then(() => {
+            console.log(
+                "status: connected  V." +
+                    mongoose.version +
+                    " DBname: " +
+                    mongoose.connection.name +
+                    " Model: " +
+                    mongoose.modelNames()
+            );
+        });
+    } catch (err) {
+        console.log("status: error" + "error: " + err + " message : retry after 5 seconds " + count);
+        count++;
+        setTimeout(connectWithRetry, 5000);
+    }
 };
 
 connectWithRetry();

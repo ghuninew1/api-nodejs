@@ -14,27 +14,15 @@ const dbName = {
     hostips: hostips,
 };
 const db = mongoose.connection;
+
 exports.findAll = async (req, res) => {
     try {
-        const collections = await mongoose.connections[0].collections;
-        const create_atModel = await mongoose.connection.db.listCollections().toArray();
-        const result = Object.keys(collections).map((data, idx) => {
-            const name = Object.keys(collections)[idx].split("_")[0];
-            const create_at = create_atModel.find((data) => data.name === name);
-            return {
-                name: data.split("_")[0],
-                url:
-                    req.protocol +
-                    "://" +
-                    req.get("host") +
-                    req.originalUrl +
-                    "/" +
-                    data.split("_")[0],
-                length: data.split("_")[0].length,
-                create_at: create_at ? create_at : null,
-            };
-        });
-        res.status(200).json(result);
+        const dball = async () => {
+            const data = await db.db.listCollections().toArray();
+            return data;
+        }
+        const data = await dball();
+        res.status(200).json(data);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -105,7 +93,7 @@ exports.updateByid = async (req, res) => {
             }
             const fileUpdate = await dbName[name].findOneAndUpdate({ _id: id }, data).exec();
             if (fileUpdate?.file) {
-                fs.unlinkSync(`./uploads/${fileUpdate.file}`, (err) => {
+                fs.unlinkSync(`./public/uploads/${fileUpdate.file}`, (err) => {
                     if (err) {
                         res.status(500).json({ message: err.message });
                     }
@@ -133,7 +121,7 @@ exports.deleteByid = async (req, res) => {
             const id = req.params.id;
             const fileRemove = await dbName[name].findOneAndDelete({ _id: id }).exec();
             if (fileRemove?.file) {
-                fs.unlinkSync(`./uploads/${fileRemove.file}`, (err) => {
+                fs.unlinkSync(`./public/uploads/${fileRemove.file}`, (err) => {
                     if (err) {
                         res.status(500).json({ message: err.message });
                     }

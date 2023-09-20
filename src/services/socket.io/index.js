@@ -4,19 +4,22 @@ const pingCheck = require("./pingCheck");
 
 let io;
 
-// const addSocketEvents = (socket, config) => {
-//         // socket.emit("esm_start", config.spans);
-//         socket.on("esm_start", () => {
-//             socket.emit("esm_start", config.spans);
+const spans = [
+    {
+        interval: 1,
+        retention: 60,
+    },
+    {
+        interval: 5,
+        retention: 60,
+    },
+    {
+        interval: 15,
+        retention: 60,
+    },
+];
 
-//             socket.on("esm_change", () => {
-//                 socket.emit("esm_start", config.spans);
-//             });
-//         });
-
-// };
-
-module.exports = socketIoInit = (server, config, statuscode) => {
+module.exports = socketIoInit = (server) => {
     if (io === null || io === undefined) {
         io = new Server(server, {
             path: "/ws",
@@ -36,24 +39,25 @@ module.exports = socketIoInit = (server, config, statuscode) => {
                 console.log("Socket upgraded");
             });
             console.log("Socket connected: " + socket.id);
+            
             socket.on("disconnect", (reason) => {
                 console.log(`disconnected due to ${reason}` + " : " + socket.id);
             });
 
             socket.on("esm_on", () => {
-                socket.emit("esm_start", config.spans);
+                socket.emit("esm_start", spans);
                 socket.on("esm_change", () => {
-                    socket.emit("esm_start", config.spans);
+                    socket.emit("esm_start", spans);
                 });
             });
 
-            await pingCheck(socket, statuscode);
-            return config.spans.forEach((span) => {
+            await pingCheck(socket);
+            spans.forEach((span) => {
                 span.os = [];
                 span.responses = [];
                 socket.on("esm_on", () => {
                     const interval = setInterval(
-                        async () => await gatherOsMetrics(io, span),
+                        async () => gatherOsMetrics(io, span),
                         span.interval * 1000
                     );
                     interval.unref();

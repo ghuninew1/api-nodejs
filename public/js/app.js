@@ -15,6 +15,7 @@ const wsconnect = document.querySelector("#wsconnect");
 const dataStatus = document.querySelector("#datastatus");
 const wslohout = document.querySelector("#logout");
 const wsstatus = document.querySelector("#wsstatus");
+const wsstats = document.querySelector("#wsstats");
 
 wsconnect.onclick = () => {
     Websockets();
@@ -24,7 +25,7 @@ const Websockets = () => {
     const socket = io({
         path: "/ws",
         transports: ["websocket", "polling", "webtransport"],
-        cors: "*",
+        cors: { origin: "*", credentials: true },
     });
 
     socket.on("connect", () => {
@@ -44,8 +45,24 @@ const Websockets = () => {
         statuscol.classList.remove("offline");
 
         wsstatus.onclick = () => {
-            // socket.emit("status");
             socket.emit("esm_on");
+        };
+        wsstats.onclick = () => {
+            const nodeData = [
+                {
+                    ip: "true.bigbrain-studio.com",
+                },
+                {
+                    ip: "ais.bigbrain-studio.com",
+                },
+                {
+                    ip: "one.one.one.one",
+                },
+                {
+                    ip: "dns.google",
+                },
+            ];
+            socket.emit("status", nodeData);
         };
     });
 
@@ -59,7 +76,6 @@ const Websockets = () => {
         $transport.innerText = "N/A";
         statuscol.classList.add("offline");
         statuscol.classList.remove("online");
-
     });
 
     wslohout.onclick = () => {
@@ -299,7 +315,7 @@ const Websockets = () => {
                 });
 
                 let spanNode = document.createElement("span");
-                let textNode = document.createTextNode((span.retention * span.interval) / 60 + "M"); // eslint-disable-line
+                let textNode = document.createTextNode((span.retention * span.interval) / 60 + "M"); 
 
                 spanNode.appendChild(textNode);
                 spanNode.setAttribute("id", index);
@@ -310,7 +326,8 @@ const Websockets = () => {
         }
     });
     socket.on("nodeStatus", async (data) => {
-        dataStatus.innerText = JSON.stringify(data);
+            const nodeStatus = document.querySelector(`#node-${data.id}`);
+            nodeStatus.innerText = JSON.stringify(data);    
     });
     socket.on("esm_stats", async function (data) {
         // console.log("stats", data);
@@ -357,31 +374,31 @@ const Websockets = () => {
                 eventLoopChart.data.labels.push(os.timestamp);
             }
 
-            // responseTimeStat.textContent = "0.00ms";
-            // if (responses) {
-            //     responseTimeStat.textContent = Number(responses).toFixed(2) + "ms";
-            //     responseTimeChart.data.datasets[0].data.push(responses);
-            //     responseTimeChart.data.labels.push(Date.now());
-            // }
-
+            responseTimeStat.textContent = "0.00ms";
             if (responses) {
-                // let deltaTime =
-                //     Date.now() - rpsChart.data.labels[rpsChart.data.labels.length - 1];
-
-                // if (deltaTime < 1) deltaTime = 1000;
-                rpsStat.textContent = Number(responses).toFixed(2) + "ms";
-                rpsChart.data.datasets[0].data.push(responses);
-                rpsChart.data.labels.push(Date.now());
+                responseTimeStat.textContent = responses.mean.toFixed(2) + "ms";
+                responseTimeChart.data.datasets[0].data.push(responses.mean);
+                responseTimeChart.data.labels.push(responses.timestamp);
             }
 
-            // if (responses) {
-            //     for (let i = 0; i < 4; i++) {
-            //         statusCodesChart.data.datasets[i].data.push(data.responses[i + 2]);
-            //     }
-            //     statusCodesChart.data.labels.push(data.responses.timestamp);
-            // }
+            if (responses) {
+                var deltaTime =
+                    responses.timestamp - rpsChart.data.labels[rpsChart.data.labels.length - 1];
 
-            await charts.forEach(function (chart) {
+                if (deltaTime < 1) deltaTime = 1000;
+                rpsStat.textContent = ((responses.count / deltaTime) * 1000).toFixed(2);
+                rpsChart.data.datasets[0].data.push((responses.count / deltaTime) * 1000);
+                rpsChart.data.labels.push(responses.timestamp);
+            }
+
+            if (responses) {
+                for (var i = 0; i < 4; i++) {
+                    statusCodesChart.data.datasets[i].data.push(data.responses[i + 2]);
+                }
+                statusCodesChart.data.labels.push(data.responses.timestamp);
+            }
+
+            charts.forEach(function (chart) {
                 if (spans[defaultSpan].retention < chart.data.labels.length) {
                     chart.data.datasets.forEach(function (dataset) {
                         dataset.data.shift();
@@ -391,8 +408,6 @@ const Websockets = () => {
                 }
                 chart.update();
             });
-
-
         }
     });
 };

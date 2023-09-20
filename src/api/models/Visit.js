@@ -1,20 +1,21 @@
 const mongoose = require("../../services/mongoose.service").mongoose;
 
+const schemaOptions = {
+    timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+    versionKey: false
+};
 const visitSchema = new mongoose.Schema(
     {
-        name: {
+        url: {
             type: String,
+            required: true,
         },
-        value: {
+        counter: {
             type: Number,
-        },
-        detail: {
-            type: String,
+            required: true,
         },
     },
-    {
-        timestamps: true,
-        versionKey: false,
-    }
-);
-module.exports = mongoose.model("Visit", visitSchema);
+    schemaOptions);
+const visits = mongoose.model("visits", visitSchema, "visits");
+
+module.exports = visits;

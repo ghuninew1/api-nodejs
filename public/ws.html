@@ -10,7 +10,6 @@
         <link rel="stylesheet" href="./css/mycss.css" />
         <link rel="stylesheet" href="./css/default.css" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
-
     </head>
     <body>
         <main>
@@ -20,11 +19,16 @@
                     ><span id="statuscol" class="offline"></span>
                 </div>
                 <div>Transport: <span id="transport">N/A</span></div>
-                <div id="datastatus"></div>
+                <!-- <div id="datastatus"></div> -->
+                <p id="node-0"></p>
+                <p id="node-1"></p>
+                <p id="node-2"></p>
+                <p id="node-3"></p>
             </div>
             <div class="sec">
                 <button id="wsconnect" type="button" title="Connect">Connect</button>
                 <button id="logout" type="button" title="Simulate logout">Close</button>
+                <button id="wsstats" type="button" title="Simulate cpu">Stats</button>
                 <button id="wsstatus" type="button" title="Simulate cpu">Status</button>
             </div>
             <div class="main">
@@ -39,7 +43,7 @@
                                 <h1 id="cpuStat">- %</h1>
                             </div>
                             <div class="chart-container">
-                                <canvas id="cpuChart" ></canvas>
+                                <canvas id="cpuChart"></canvas>
                             </div>
                         </div>
                         <div class="container mem">
@@ -57,7 +61,7 @@
                                 <h1 id="heapStat">- %</h1>
                             </div>
                             <div class="chart-container">
-                                <canvas id="heapChart" ></canvas>
+                                <canvas id="heapChart"></canvas>
                             </div>
                         </div>
                         <div class="container load">
@@ -66,16 +70,16 @@
                                 <h1 id="loadStat">-</h1>
                             </div>
                             <div class="chart-container">
-                                <canvas id="loadChart" ></canvas>
+                                <canvas id="loadChart"></canvas>
                             </div>
                         </div>
                         <div class="container eventLoop">
                             <div class="stats-column">
-                                <h5>Spent in Event Loop</h5>
+                                <h5>Event Loop</h5>
                                 <h1 id="eventLoopStat">ms</h1>
                             </div>
                             <div class="chart-container">
-                                <canvas id="eventLoopChart" ></canvas>
+                                <canvas id="eventLoopChart"></canvas>
                             </div>
                         </div>
                         <div class="container responseTime">
@@ -84,7 +88,7 @@
                                 <h1 id="responseTimeStat">-</h1>
                             </div>
                             <div class="chart-container">
-                                <canvas id="responseTimeChart" ></canvas>
+                                <canvas id="responseTimeChart"></canvas>
                             </div>
                         </div>
                         <div class="container rps">
@@ -92,29 +96,27 @@
                                 <h5>Requests per Second</h5>
                                 <h1 id="rpsStat">-</h1>
                             </div>
-                            <div class="chart-container">
-                                <canvas id="rpsChart" ></canvas>
+                            <div class="chart-container" >
+                                <canvas id="rpsChart"></canvas>
                             </div>
                         </div>
                         <div class="container statusCodes">
-                            <!-- <div class="stats-column">
+                            <div class="stats-column" >
                                 <h5>Status Codes</h5>
                                 <h6 class="status-code status-code-2xx">2xx</h6>
                                 <h6 class="status-code status-code-3xx">3xx</h6>
                                 <h6 class="status-code status-code-4xx">4xx</h6>
                                 <h6 class="status-code status-code-5xx">5xx</h6>
-                            </div> -->
+                            </div>
                             <div class="chart-container">
-                                <canvas id="statusCodesChart"></canvas>
+                                <canvas id="statusCodesChart" ></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="footer">
-                <p>
-                    &#9829; @GhuniNew
-                </p>
+                <p>&#9829; @GhuniNew</p>
             </div>
         </main>
         <script src="/socket.io/socket.io.min.js"></script>

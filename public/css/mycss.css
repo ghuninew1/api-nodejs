@@ -5,14 +5,13 @@
 }
 body{
     font-family: 'Roboto', sans-serif;
-    font-size: 14px;
 }
 main {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
+    max-width: 100%;
 }
 
 .main {
@@ -22,6 +21,7 @@ main {
     margin: 10px;
     padding: 0;
     outline: none;
+    width: 90%;
 }
  #status, #transport{
     margin: 5px;

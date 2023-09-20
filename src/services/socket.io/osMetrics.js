@@ -3,6 +3,7 @@ const os = require("os");
 const v8 = require("v8");
 const eventLoopStats = require("event-loop-stats"); 
 const sendMetrics = require("./sendMetrics");
+const { response } = require("express");
 
 module.exports = (io, span) => {
     const starttime = process.hrtime();
@@ -45,7 +46,26 @@ module.exports = (io, span) => {
 
         const diff = process.hrtime(starttime);
         const responseTime = (diff[0] * 1e3 + diff[1]) * 1e-6;
-        span.responses.push(responseTime);
+        const statusCode = response.statusCode;
+        const category = Math.floor(statusCode / 100);
+        
+        if (last !== undefined && last.timestamp / 1000 + span.interval > Date.now() / 1000) {
+            last[category] += 1;
+            last.count += 1;
+            last.mean += (responseTime - last.mean) / last.count;
+            // console.log("last",last)
+        } else {
+            span.responses.push({
+                2: category === 2 ? 1 : 0,
+                3: category === 3 ? 1 : 0,
+                4: category === 4 ? 1 : 0,
+                5: category === 5 ? 1 : 0,
+                count: 1,
+                mean: responseTime,
+                timestamp: Date.now(), 
+            });
+            // console.log("span",span)
+        }
 
         // todo: I think this check should be moved somewhere else
         if (span.os.length >= span.retention) span.os.shift();

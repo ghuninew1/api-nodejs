@@ -10,6 +10,8 @@ const config = require("./src/services/config");
 const authRoute = require("./src/routes/auth");
 const apiRoute = require("./src/routes/api");
 const socketIoInit = require("./src/services/socket.io/index");
+const { visitUpdate } = require("./src/api/middleware/visit");
+const visits = require("./src/api/models/Visit");
 
 const app = express();
 
@@ -19,22 +21,38 @@ app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
 
 // middlewares
-app.use(bodyParser.json({ limit: "50mb", extended: true }));
+app.use(bodyParser.json());
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "./public")));
 
-//root route
-app.get("/", (req, res) => {
-    res.header("X-Powered-By", "GhuniNew")
-    res.status(200).json({ HOME: "API @GhuniNew" });
+app.use((req, res, next) => {
+    res.header("X-powered-by", "GhuniNew");
+    next();
 });
 
-app.get("/ws", async (req, res) => {
-    res.header("X-Powered-By", "GhuniNew")
-    res.status(200).render("ws");
-});
+const indexData = async (req, res) => {
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+    const visitAll = await visits.find();
+    const visit = (path) => visitAll.find((v) => path === v.url ? v : null);
+    const counter = (path) => visit(path) ? visit(path).counter : 0;
+    const counters = {
+        all: visitAll.reduce((acc, cur) => acc + cur.counter, 0),
+        index: counter("/"),
+        ws: counter("/ws"),
+        api: counter("/api"),
+    }
+    res.status(200).json({ message: "API GhuniNew", ip: ip , counters: counters});
+};
+
+const wsData = async (req, res) => {
+    res.status(200).render("ws.html");
+};
+//root route
+app.get("/", indexData );
+
+app.get("/ws", wsData);
 
 // routes Api
 authRoute(app);
@@ -52,21 +70,21 @@ app.use((err, req, res) => {
 });
 
 //unix socket
-const unix = http.createServer(app);
-if (fs.existsSync(config.unix_socket)) {
-    fs.unlink(config.unix_socket, (err) => {
-        if (err) {
-            console.error(err);
-        }
-        unix.listen(config.unix_socket, () => {
-            console.log(`app running on socket ${config.unix_socket}`);
-        });
-    });
-} else {
-    unix.listen(config.unix_socket, () => {
-        console.log(`app running on socket ${config.unix_socket}`);
-    });
-}
+// const unix = http.createServer(app);
+// if (fs.existsSync(config.unix_socket)) {
+//     fs.unlink(config.unix_socket, (err) => {
+//         if (err) {
+//             console.error(err);
+//         }
+//         unix.listen(config.unix_socket, () => {
+//             console.log(`app running on socket ${config.unix_socket}`);
+//         });
+//     });
+// } else {
+//     unix.listen(config.unix_socket, () => {
+//         console.log(`app running on socket ${config.unix_socket}`);
+//     });
+// }
 
 // http server
 const server = http.createServer(app);
@@ -74,4 +92,4 @@ server.listen(config.port, () => {
     console.log(`app running on http://localhost:${config.port}`);
 });
 
-socketIoInit(server, config, app.response.statusCode);
+socketIoInit(server);
