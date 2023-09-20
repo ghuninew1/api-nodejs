@@ -12,6 +12,7 @@ const apiRoute = require("./src/routes/api");
 const socketIoInit = require("./src/services/socket.io/index");
 const { visitUpdate } = require("./src/api/middleware/visit");
 const visits = require("./src/api/models/Visit");
+const { env } = require("process");
 
 const app = express();
 
@@ -93,3 +94,5 @@ server.listen(config.port, () => {
 });
 
 socketIoInit(server);
+
+module.exports = app;
