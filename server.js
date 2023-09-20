@@ -12,7 +12,6 @@ const apiRoute = require("./src/routes/api");
 const socketIoInit = require("./src/services/socket.io/index");
 const { visitUpdate } = require("./src/api/middleware/visit");
 const visits = require("./src/api/models/Visit");
-const { env } = require("process");
 
 const app = express();
 
@@ -25,26 +24,32 @@ app.set("view engine", "html");
 app.use(bodyParser.json());
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use(morgan("dev"));
+app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms'));
 app.use(express.static(path.join(__dirname, "./public")));
 
 app.use((req, res, next) => {
+    const startAt = process.hrtime()
+    const elapsed = process.hrtime(startAt)
+    const ms =( elapsed[0] * 1e9 + elapsed[1]) / 1000;
+    // console.log("ms", ms.toFixed(3));
     res.header("X-powered-by", "GhuniNew");
+    res.header("X-Response-Time", `${ms.toFixed(3)} ms`);
     next();
 });
 
+
 const indexData = async (req, res) => {
-    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
-    const visitAll = await visits.find();
-    const visit = (path) => visitAll.find((v) => path === v.url ? v : null);
-    const counter = (path) => visit(path) ? visit(path).counter : 0;
-    const counters = {
-        all: visitAll.reduce((acc, cur) => acc + cur.counter, 0),
-        index: counter("/"),
-        ws: counter("/ws"),
-        api: counter("/api"),
-    }
-    res.status(200).json({ message: "API GhuniNew", ip: ip , counters: counters});
+    // const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+    // const visitAll = await visits.find();
+    // const visit = (path) => visitAll.find((v) => path === v.url ? v : null);
+    // const counter = (path) => visit(path) ? visit(path).counter : 0;
+    // const counters = {
+    //     all: visitAll.reduce((acc, cur) => acc + cur.counter, 0),
+    //     index: counter("/"),
+    //     ws: counter("/ws"),
+    //     api: counter("/api"),
+    // }
+    res.status(200).json({ message: "API GhuniNew"});
 };
 
 const wsData = async (req, res) => {
@@ -89,8 +94,11 @@ app.use((err, req, res) => {
 
 // http server
 const server = http.createServer(app);
+
 server.listen(config.port, () => {
-    console.log(`app running on http://localhost:${config.port}`);
+    const addr = server.address();
+    const address = addr.address === "::" ? "localhost" : addr.address;
+    console.log(`app running on ` +"http://" + address + ":" + addr.port);
 });
 
 socketIoInit(server);
