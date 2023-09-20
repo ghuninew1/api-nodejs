@@ -22,7 +22,7 @@ h6 {
 }
 
 p {
-    font-size: 0.7em;
+    font-size: 13px;
     color: #888;
 }
 
@@ -35,11 +35,10 @@ span {
 
 canvas {
     max-width: 100%;
-    width: 800px;
     margin: 0 auto;
-    display: block;
     padding: 10px;
-    height: 80vh;
+    width: 100%;
+    display: flex !important;
 }
 
 .content {
@@ -57,32 +56,31 @@ canvas {
 }
 
 .stats-column {
-    display: inline;
-    align-items: center;
-    padding: 0 10px;
+    align-items: start;
+    padding: 0;
     font-size: 14px;
-    margin: 0 auto;
-    width: 100px;
+    margin: 0;
+    position: absolute;
 }
 
 .container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     margin: 0 auto;
     padding: 10px;
     width: 100%;
+    display: flex;
+    flex-direction: row;
 }
 
 .chart-container {
     max-width: 100%;
     height: 120px;
     width: 100%;
+    margin-left: 50px;
 }
 
 .container.healthChecks {
-    height: auto;
+    height: 100%;
 }
 
 .health-check-row {
@@ -95,7 +93,7 @@ canvas {
 }
 
 .health-check-title-column {
-    display: flex;
+    display: inline;
     align-items: center;
     padding: 0 10px;
 }
@@ -113,7 +111,7 @@ canvas {
 .health-check-status-container {
     align-items: center;
     border-radius: 0 4px 4px 0;
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     text-align: center;
 }

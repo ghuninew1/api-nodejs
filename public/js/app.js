@@ -1,10 +1,10 @@
-"use strict";
+// "use strict";
 
-Chart.defaults.global.defaultFontSize = 8;
+Chart.defaults.global.defaultFontSize = 10;
 Chart.defaults.global.animation.duration = 500;
 Chart.defaults.global.legend.display = false;
 Chart.defaults.global.elements.line.backgroundColor = "rgba(0,0,0,0)";
-Chart.defaults.global.elements.line.borderColor = "rgba(1,1,9,9.9)";
+Chart.defaults.global.elements.line.borderColor = "rgba(1,1,1,1)";
 Chart.defaults.global.elements.line.borderWidth = 1;
 Chart.defaults.global.elements.point.radius = 3;
 
@@ -56,7 +56,10 @@ const Websockets = () => {
                     ip: "ais.bigbrain-studio.com",
                 },
                 {
-                    ip: "one.one.one.one",
+                    ip: "1.0.0.1",
+                },
+                {
+                    ip: "1.1.1.1",
                 },
                 {
                     ip: "dns.google",
@@ -84,16 +87,13 @@ const Websockets = () => {
 
     let defaultSpan = 0;
     let spans = [];
-    let statusCodesColors = ["#75D701", "#47b8e0", "#ffc952", "#E53A40"];
-
+    let statusCodesColors = ['#75D701', '#47b8e0', '#ffc952', '#E53A40'];
+    
     let defaultDataset = {
-        label: "",
+        label: '',
         data: [],
         lineTension: 0.2,
         pointRadius: 0,
-        borderColor: "#000777",
-        borderWidth: 1,
-        fill: false,
     };
 
     let defaultOptions = {
@@ -107,7 +107,7 @@ const Websockets = () => {
             ],
             xAxes: [
                 {
-                    type: "time",
+                    type: 'time',
                     time: {
                         unitStepSize: 30,
                     },
@@ -118,7 +118,7 @@ const Websockets = () => {
             ],
         },
         tooltips: {
-            enabled: false,
+            enabled: true,
         },
         responsive: true,
         maintainAspectRatio: false,
@@ -382,7 +382,7 @@ const Websockets = () => {
             }
 
             if (responses) {
-                var deltaTime =
+                let deltaTime =
                     responses.timestamp - rpsChart.data.labels[rpsChart.data.labels.length - 1];
 
                 if (deltaTime < 1) deltaTime = 1000;
@@ -392,7 +392,7 @@ const Websockets = () => {
             }
 
             if (responses) {
-                for (var i = 0; i < 4; i++) {
+                for (let i = 0; i < 4; i++) {
                     statusCodesChart.data.datasets[i].data.push(data.responses[i + 2]);
                 }
                 statusCodesChart.data.labels.push(data.responses.timestamp);
