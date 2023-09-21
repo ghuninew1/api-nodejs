@@ -203,11 +203,46 @@ exports.visits = async (req, res) => {
 exports.pingCheck = async (req, res) => {
     try {
         const ip = req.query.ip;
-        const ress = await ping.promise.probe(ip, {
-            timeout: 10,
-            extra: ["-i 2"],
-        });
-        res.status(200).json(ress);
+        const ips = ip.split(",");
+        if (ips.length > 1) {
+            const ress = [];
+            for (let i = 0; i < ips.length; i++) {
+                const resping = await ping.promise.probe(ips[i], {
+                    timeout: 10,
+                    extra: ["-i", "2"],
+                });
+                ress.push(resping);
+            }
+            res.status(200).json(ress);
+        } else {
+            const ress = await ping.promise.probe(ip, {
+                timeout: 10,
+                extra: ["-i", "2"],
+            });
+            res.status(200).json(ress);
+        }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+exports.ipPublic = async (req, res) => {
+    try {
+        const ip = req.query.ip;
+        if (ip) {
+            const ipinfo = `https://ipinfo.io/${ip}/json?token=f44742fe54a2b2`
+            const Response = await fetch(ipinfo);
+            const data = await Response.json();
+            res.status(200).json({ ip: ip, data: data });
+        } else {
+            const url = "https://ifconfig.me/all.json"
+            const url2 = "https://ipinfo.io/json?token=f44742fe54a2b2"
+            const Response = await fetch(url);
+            const Response2 = await fetch(url2);
+            const data = await Response.json();
+            const data2 = await Response2.json();
+            res.status(200).json({ ip: req.ip, data: data , data2: data2});
+        }
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

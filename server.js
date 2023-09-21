@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
-const morgan = require("morgan");
 const fs = require("fs");
 
 const config = require("./src/services/config");
@@ -25,14 +24,16 @@ app.set("view engine", "html");
 app.use(bodyParser.json());
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms'));
 app.use(express.static(path.join(__dirname, "./public")));
+
 app.use((req, res, next) => {
     const startAt = process.hrtime();
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
     const elapsed = process.hrtime(startAt);
-    const ms = (elapsed[0] * 1000000000 + elapsed[1]) / 1000;
+    const ms = (elapsed[0] * 100000000 + elapsed[1]) / 1000; 
     res.header("X-powered-by", "GhuniNew");
     res.header("X-Response-Time", `${ms.toFixed(3)} ms`);
+    console.log(`${ip} ${res.statusCode} ${req.method} ${req.url} ${ms.toFixed(3)} ms`);
     next();
 });
 

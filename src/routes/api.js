@@ -8,6 +8,7 @@ const {
     deleteByid,
     visits,
     pingCheck,
+    ipPublic,
 } = require("../api/controllers/api");
 const { auth } = require("../api/middleware/auth");
 const { upload } = require("../api/middleware/upload");
@@ -23,4 +24,5 @@ module.exports = (app) => {
     
     app.get("/visits", visits);
     app.get("/ping", pingCheck);
+    app.get("/ip", ipPublic);
 };

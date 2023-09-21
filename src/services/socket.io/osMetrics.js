@@ -1,7 +1,7 @@
 const pidusage = require("pidusage");
 const os = require("os");
 const v8 = require("v8");
-const eventLoopStats = require("event-loop-stats"); 
+// const eventLoopStats = require("event-loop-stats"); 
 const sendMetrics = require("./sendMetrics");
 const { response } = require("express");
 
@@ -31,9 +31,9 @@ module.exports = (io, span) => {
         stat.timestamp = Date.now();
         stat.heap = v8.getHeapStatistics();
 
-        if (eventLoopStats) {
-            stat.loop = eventLoopStats.sense();
-        }
+        // if (eventLoopStats) {
+        //     stat.loop = eventLoopStats.sense();
+        // }
 
         span.os.push(stat);
         if (!span.responses[0] || (last.timestamp + span.interval) * 1000 < Date.now()) {
