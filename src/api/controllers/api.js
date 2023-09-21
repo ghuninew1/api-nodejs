@@ -4,8 +4,10 @@ const Product = require("../models/Product");
 const Visits = require("../models/Visit");
 const Users = require("../models/Users");
 const Hostip = require("../models/HostIP");
+const Token = require("../models/Token");
 const fs = require("fs");
 const ping = require("ping");
+const config = require("../../services/config");
 
 const dbName = {
     users: Users,
@@ -13,6 +15,7 @@ const dbName = {
     product: Product,
     visits: Visits,
     hostip: Hostip,
+    token: Token,
 };
 const db = mongoose.connection;
 
@@ -23,9 +26,13 @@ exports.findAll = async (req, res) => {
             return data;
         };
         const data = await dball();
-        res.status(200).json(data);
+        if (data.length === 0) {
+            res.status(404).json({ message: "Not Found" });
+        } else {
+            res.status(200).json(data);
+        }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -39,7 +46,7 @@ exports.findOne = async (req, res) => {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -60,7 +67,7 @@ exports.findById = async (req, res) => {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -79,7 +86,7 @@ exports.createByName = async (req, res) => {
             res.status(404).json({ message: "Not Create" });
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -96,7 +103,7 @@ exports.updateByid = async (req, res) => {
             if (fileUpdate?.file) {
                 fs.unlinkSync(`./public/uploads/${fileUpdate.file}`, (err) => {
                     if (err) {
-                        res.status(500).json({ message: err.message });
+                        res.status(500).json({ message: err });
                     }
                 });
                 fileUpdate
@@ -111,7 +118,7 @@ exports.updateByid = async (req, res) => {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -124,7 +131,7 @@ exports.deleteByid = async (req, res) => {
             if (fileRemove?.file) {
                 fs.unlinkSync(`./public/uploads/${fileRemove.file}`, (err) => {
                     if (err) {
-                        res.status(500).json({ message: err.message });
+                        res.status(500).json({ message: err });
                     }
                 });
                 fileRemove
@@ -139,7 +146,7 @@ exports.deleteByid = async (req, res) => {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -156,7 +163,7 @@ exports.deleteAll = async (req, res) => {
             res.status(404).json({ message: "Not Found" });
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -196,7 +203,7 @@ exports.visits = async (req, res) => {
             }
         });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -222,7 +229,7 @@ exports.pingCheck = async (req, res) => {
             res.status(200).json(ress);
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
     }
 };
 
@@ -230,20 +237,51 @@ exports.ipPublic = async (req, res) => {
     try {
         const ip = req.query.ip;
         if (ip) {
-            const ipinfo = `https://ipinfo.io/${ip}/json?token=f44742fe54a2b2`
+            const ipinfo = `https://ipinfo.io/${ip}/json?token=f44742fe54a2b2`;
             const Response = await fetch(ipinfo);
             const data = await Response.json();
-            res.status(200).json({ ip: ip, data: data });
+            if (data.error) {
+                res.status(404).json({ message: "Not Found" });
+            } else {
+                res.status(200).json({ ip: ip, data: data });
+            }
         } else {
-            const url = "https://ifconfig.me/all.json"
-            const url2 = "https://ipinfo.io/json?token=f44742fe54a2b2"
+            const url = "https://ifconfig.me/all.json";
+            const url2 = "https://ipinfo.io/json?token=f44742fe54a2b2";
             const Response = await fetch(url);
             const Response2 = await fetch(url2);
             const data = await Response.json();
             const data2 = await Response2.json();
-            res.status(200).json({ ip: req.ip, data: data , data2: data2});
+            if (data.error && data2.error) {
+                res.status(404).json({ message: "Not Found" });
+            } else {
+                res.status(200).json({ ip: req.ip, data: data, data2: data2 });
+            }
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err });
+    }
+};
+
+exports.lineNotify = async (req, res) => {
+    try {
+        const message = req.query.message || req.body.message;
+        if (message !== undefined) {
+            const url = "https://notify-api.line.me/api/notify";
+            const method = "POST";
+            const headers = {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Bearer ${config.line_token}`,
+            };
+            const body = `message=${message}`;
+            await fetch(url, { method, headers, body })
+                .then((response) => response.json())
+                .then((data) => res.status(201).json(data))
+                .catch((err) => res.status(500).json({ message: err }));
+        } else {
+            res.status(404).json({ message: "Not Found please enter message" });
+        }
+    } catch (err) {
+        res.status(500).json({ message: err });
     }
 };
