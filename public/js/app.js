@@ -87,10 +87,10 @@ const Websockets = () => {
 
     let defaultSpan = 0;
     let spans = [];
-    let statusCodesColors = ['#75D701', '#47b8e0', '#ffc952', '#E53A40'];
-    
+    let statusCodesColors = ["#75D701", "#47b8e0", "#ffc952", "#E53A40"];
+
     let defaultDataset = {
-        label: '',
+        label: "",
         data: [],
         lineTension: 0.2,
         pointRadius: 0,
@@ -107,7 +107,7 @@ const Websockets = () => {
             ],
             xAxes: [
                 {
-                    type: 'time',
+                    type: "time",
                     time: {
                         unitStepSize: 30,
                     },
@@ -315,7 +315,7 @@ const Websockets = () => {
                 });
 
                 let spanNode = document.createElement("span");
-                let textNode = document.createTextNode((span.retention * span.interval) / 60 + "M"); 
+                let textNode = document.createTextNode((span.retention * span.interval) / 60 + "M");
 
                 spanNode.appendChild(textNode);
                 spanNode.setAttribute("id", index);
@@ -325,13 +325,15 @@ const Websockets = () => {
             document.getElementsByTagName("span")[0].classList.add("active");
         }
     });
-    socket.on("nodeStatus", async (data) => {
-            const nodeStatus = document.querySelector(`#node-${data.id}`);
-            nodeStatus.innerText = JSON.stringify(data);    
-    });
-    socket.on("esm_stats", async function (data) {
-        // console.log("stats", data);
 
+    socket.on("nodeStatus", (data) => {
+        let nodeStatus = document.querySelector(`#node-${data.id}`);
+        nodeStatus.innerHTML = JSON.stringify(
+            data.data.host + " ip: " + data.data.numeric_host + " res: " + data.data.time
+        );
+    });
+
+    socket.on("esm_stats", async function (data) {
         if (
             data.retention === spans[defaultSpan].retention &&
             data.interval === spans[defaultSpan].interval
