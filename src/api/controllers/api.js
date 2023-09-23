@@ -243,19 +243,16 @@ exports.ipPublic = async (req, res) => {
             if (data.error) {
                 res.status(404).json({ message: "Not Found" });
             } else {
-                res.status(200).json({ ip: ip, data: data });
+                res.status(200).json(data);
             }
         } else {
-            const url = "https://ifconfig.me/all.json";
-            const url2 = "https://ipinfo.io/json?token=f44742fe54a2b2";
+            const url = "https://ipinfo.io/json?token=f44742fe54a2b2";
             const Response = await fetch(url);
-            const Response2 = await fetch(url2);
             const data = await Response.json();
-            const data2 = await Response2.json();
-            if (data.error && data2.error) {
+            if (data.error) {
                 res.status(404).json({ message: "Not Found" });
             } else {
-                res.status(200).json({ ip: req.ip, data: data, data2: data2 });
+                res.status(200).json(data);
             }
         }
     } catch (err) {

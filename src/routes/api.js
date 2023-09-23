@@ -23,8 +23,8 @@ module.exports = (app) => {
     app.delete("/api/:name/:id", auth, deleteByid);
     app.delete("/del/:name",  auth, deleteAll);
     
-    app.get("/visits", auth, visits);
-    app.get("/ping", auth, pingCheck);
-    app.get("/ip", auth, ipPublic);
+    app.get("/visits", /* auth, */ visits);
+    app.get("/ping", /* auth, */ pingCheck);
+    app.get("/ip", /* auth, */ ipPublic);
     app.post("/line", auth, lineNotify);
 };
