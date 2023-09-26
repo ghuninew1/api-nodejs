@@ -3,7 +3,7 @@ const visits = require("../models/Visit");
 exports.visitUpdate = async (req, res, next) => {
     try {
         const url = req.url;
-        const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+        const ip = req.connection.remoteAddress || req.ip;
         const visit = await visits.findOne({ url: url });
         if (visit) {
             await visits.updateOne(
@@ -18,6 +18,6 @@ exports.visitUpdate = async (req, res, next) => {
             next();
         }
     } catch (err) {
-        console.log("visitUpdate error: ", err);
+        res.status(500).json({ msg: "Server Error: " + err });
     }
 };

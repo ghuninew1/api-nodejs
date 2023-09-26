@@ -50,8 +50,7 @@ app.use((req, res) => {
 
 // error handler
 app.use((err, req, res) => {
-    console.error(err.stack);
-    res.status(500).json({ message: "Server Error @GhuniNew" });
+    res.status(500).json({ message: "Server Error @GhuniNew" , err});
 });
 
 //unix socket

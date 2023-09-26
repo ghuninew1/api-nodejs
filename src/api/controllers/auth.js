@@ -16,13 +16,13 @@ exports.register = async (req, res) => {
             password,
         });
         user.password = await bcrypt.hash(password, salt);
-
         await user.save();
         res.status(201).json({ msg: "User Created: " + user.name });
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
 };
+
 exports.login = async (req, res) => {
     try {
         const { name, password } = req.body;
