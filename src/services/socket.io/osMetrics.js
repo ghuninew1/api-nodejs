@@ -5,7 +5,7 @@ const v8 = require("v8");
 const sendMetrics = require("./sendMetrics");
 const { response } = require("express");
 
-module.exports = (io, span) => {
+module.exports = (socket, span) => {
     const starttime = process.hrtime();
     const defaultResponse = {
         2: 0,
@@ -71,6 +71,6 @@ module.exports = (io, span) => {
         if (span.os.length >= span.retention) span.os.shift();
         if (span.responses[0] && span.responses.length > span.retention) span.responses.shift();
 
-        sendMetrics(io, span);
+        sendMetrics(socket, span);
     });
 };

@@ -1,17 +1,15 @@
 const mongoose = require("../../services/mongoose.service").mongoose;
 
-const hostipsSchema = new mongoose.Schema(
+const { Schema } = mongoose;
+const hostdbSchema = new Schema(
     {
-        name: {
+        ip: {
             type: String,
         },
         status: {
             type: String,
         },
-        ip: {
-            type: String,
-        },
-        dns:{
+        name: {
             type: String,
         },
         res: {
@@ -21,6 +19,17 @@ const hostipsSchema = new mongoose.Schema(
     {
         timestamps: true,
         versionKey: false,
+    },
+    {
+        timeseries: {
+            timeField: "timestamp",
+            metaField: "metadata",
+            granularity: "hours",
+        },
+        expireAfterSeconds: 86400,
     }
 );
-module.exports = mongoose.model("hostip", hostipsSchema, "hostip");
+
+const hostip = mongoose.model("hostip", hostdbSchema, "hostip");
+
+module.exports = hostip;

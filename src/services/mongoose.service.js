@@ -34,4 +34,4 @@ const connectWithRetry = async () => {
 
 connectWithRetry();
 
-exports.mongoose = mongoose;
+module.exports = mongoose;

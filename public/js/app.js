@@ -26,6 +26,11 @@ const Websockets = () => {
         path: "/ws",
         transports: ["websocket", "polling", "webtransport"],
         cors: { origin: "*", credentials: true },
+        transportOptions: {
+            webtransport: {
+                hostname: "127.0.0.1",
+            },
+        },
     });
 
     socket.on("connect", () => {
@@ -51,18 +56,23 @@ const Websockets = () => {
             const nodeData = [
                 {
                     ip: "true.bigbrain-studio.com",
+                    int: 5,
                 },
                 {
                     ip: "ais.bigbrain-studio.com",
+                    int: 5,
                 },
                 {
                     ip: "1.0.0.1",
+                    int: 5,
                 },
                 {
                     ip: "1.1.1.1",
+                    int: 5,
                 },
                 {
                     ip: "dns.google",
+                    int: 5,
                 },
             ];
             socket.emit("status", nodeData);

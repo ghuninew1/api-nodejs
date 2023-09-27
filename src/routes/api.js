@@ -6,13 +6,13 @@ const {
     updateByid,
     createByName,
     deleteByid,
-    visits,
     pingCheck,
     ipPublic,
     lineNotify,
 } = require("../api/controllers/api");
 const { auth } = require("../api/middleware/auth");
 const { upload, progressUpload } = require("../api/middleware/upload");
+const { visitUpdate } = require("../api/middleware/visit");
 
 module.exports = (app) => {
     app.get("/api", /* auth, */ findAll);
@@ -23,9 +23,14 @@ module.exports = (app) => {
     app.delete("/api/:name/:id", /* auth, */ deleteByid);
     app.delete("/del/:name",  /* auth, */ deleteAll);
     
-    app.get("/visits", /* auth, */ visits);
     app.get("/ping", /* auth, */ pingCheck);
-    // app.post("/ping", /* auth, */ pingCheck);
-    app.get("/ip", /* auth, */ ipPublic);
+    app.get("/ip", /* auth, */ visitUpdate, ipPublic);
     app.post("/line", auth, lineNotify);
+
+    // app.get("/app/getdata", getTestData);
+    // app.post("/app/getdata", getTestData);
+    // app.get("/app/up", getUploadSpeed);
+    // app.get("/app/down", getDownloadSpeed);
+
+
 };

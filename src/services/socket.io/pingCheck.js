@@ -1,25 +1,31 @@
 const HostIP = require("../../api/models/HostIP");
 const ping = require("ping");
 
-module.exports = async (io) => {
-    io.on("status", (nodeData) => {
-        const pingCheck = async () => {
-            Object.values(nodeData).forEach(async (node, idx) => {
-                const ress = await ping.promise.probe(node.ip, {
-                    timeout: 10,
-                    extra: ["-i", "2"],
-                });
+exports.pingCheck = async (socket, nodeData) => {
+    try {
+        const pingCheck = () => {
+            Object.values(nodeData).forEach((node, idx) => {
+                const interval = setInterval(async () => {
+                    const ress = await ping.promise.probe(node.ip, {
+                        timeout: 10,
+                        extra: ["-i", "2"],
+                    });
+                    const status = ress.alive ? "online" : "offline";
+                    socket.emit("nodeStatus", {
+                        id: idx,
+                        data: ress,
+                    });
 
-                io.emit("nodeStatus", {
-                    id: idx,
-                    data: ress,
-                });
+                    // if (status === "online") {
+                    //     const updateData = HostIP.insertMany([{ip: ress.numeric_host, status: status, res: ress.time}]);
+                    //     updateData ? console.log("update success") : console.log("update fail");
+                    // } 
+                }, node.int * 1000);
+                interval.unref();
             });
         };
-        // setInterval(() => {
-        //     setTimeout(() => {
-                pingCheck();
-        //     }, 1000);
-        // }, 5000);
-    });
+        setTimeout(() => pingCheck(), 1000);
+    } catch (error) {
+        console.log("socker error: ", error);
+    }
 };

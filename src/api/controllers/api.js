@@ -8,7 +8,6 @@ const Token = require("../models/Token");
 const fs = require("fs");
 const ping = require("ping");
 const config = require("../../services/config");
-const { response } = require("express");
 
 const dbName = {
     users: Users,
@@ -180,46 +179,6 @@ exports.deleteAll = async (req, res) => {
         } else {
             res.status(404).json({ message: "Delete Fail" });
         }
-    } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
-    }
-};
-
-exports.visits = async (req, res) => {
-    try {
-        const url = req.query.url;
-        const ip = req.connection.remoteAddress || req.ip;
-        const visit = await Visits.findOne({ url: url });
-        const counter = visit ? visit.counter : 0;
-        const dns = require("dns");
-        dns.lookup(url, async (err, address, family) => {
-            if (err) {
-                address = "Not Found";
-                family = "Not Found";
-            }
-            if (url !== "") {
-                if (visit) {
-                    await Visits.updateOne(
-                        { url: url },
-                        { $inc: { counter: 1 } },
-                        { $set: { ip: address } },
-                        { new: true }
-                    );
-                } else {
-                    await Visits.create({ url: url, counter: 1, ip: address });
-                }
-                res.status(200).json({
-                    message: "Visit Success",
-                    ip: ip,
-                    url: url,
-                    address: address,
-                    family: family,
-                    counter: counter,
-                });
-            } else {
-                res.status(404).json({ message: "Not Found please enter url" });
-            }
-        });
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }

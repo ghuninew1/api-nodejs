@@ -1,6 +1,6 @@
 const { Server } = require("socket.io");
 const gatherOsMetrics = require("./osMetrics");
-const pingCheck = require("./pingCheck");
+const { pingCheck } = require("./pingCheck");
 
 let io;
 
@@ -23,8 +23,16 @@ module.exports = socketIoInit = (server) => {
     if (io === null || io === undefined) {
         io = new Server(server, {
             path: "/ws",
-            transports: ["websocket", "polling", "webtransport"],
+            transports: ["polling", "websocket", "webtransport"],
             cors: { origin: "*", credentials: true },
+            httpCompression: {
+                // Engine.IO options
+                threshold: 2048, // defaults to 1024
+                // Node.js zlib options
+                chunkSize: 8 * 1024, // defaults to 16 * 1024
+                windowBits: 14, // defaults to 15
+                memLevel: 7, // defaults to 8
+            },
         });
         io.on("connection", async (socket) => {
             const transport = socket.conn.transport.name;
@@ -39,27 +47,33 @@ module.exports = socketIoInit = (server) => {
                 console.log("Socket upgraded");
             });
             console.log("Socket connected: " + socket.id);
-            
+
             socket.on("disconnect", (reason) => {
                 console.log(`disconnected due to ${reason}` + " : " + socket.id);
             });
 
-            socket.on("esm_on", () => {
-                socket.emit("esm_start", spans);
-                socket.on("esm_change", () => {
-                    socket.emit("esm_start", spans);
-                });
+            // socket.on("esm_on", () => {
+            //     socket.emit("esm_start", spans);
+            //     socket.on("esm_change", () => {
+            //         socket.emit("esm_start", spans);
+            //     });
+            // });
+
+            socket.on("status", (nodeData) => {
+                pingCheck(socket, nodeData);
             });
 
-            await pingCheck(socket);
             spans.forEach((span) => {
                 span.os = [];
                 span.responses = [];
                 socket.on("esm_on", () => {
-                    const interval = setInterval(
-                        async () => gatherOsMetrics(io, span),
-                        span.interval * 1000
-                    );
+                    socket.emit("esm_start", spans);
+                    socket.on("esm_change", () => {
+                        socket.emit("esm_start", spans);
+                    });
+                    const interval = setInterval(() => {
+                        gatherOsMetrics(socket, span);
+                    }, span.interval * 1000);
                     interval.unref();
                 });
             });
