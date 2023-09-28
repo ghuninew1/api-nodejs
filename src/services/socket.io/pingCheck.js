@@ -1,30 +1,38 @@
+const { set } = require("mongoose");
 const HostIP = require("../../api/models/HostIP");
 const ping = require("ping");
 
+let count = 0;
 exports.pingCheck = async (socket, nodeData) => {
     try {
-        const pingCheck = () => {
-            Object.values(nodeData).forEach((node, idx) => {
-                const interval = setInterval(async () => {
-                    const ress = await ping.promise.probe(node.ip, {
-                        timeout: 10,
-                        extra: ["-i", "2"],
-                    });
-                    const status = ress.alive ? "online" : "offline";
-                    socket.emit("nodeStatus", {
-                        id: idx,
-                        data: ress,
-                    });
-
-                    // if (status === "online") {
-                    //     const updateData = HostIP.insertMany([{ip: ress.numeric_host, status: status, res: ress.time}]);
-                    //     updateData ? console.log("update success") : console.log("update fail");
-                    // } 
-                }, node.int * 1000);
-                interval.unref();
-            });
-        };
-        setTimeout(() => pingCheck(), 1000);
+        Object.values(nodeData).forEach(async (node, idx) => {
+            const interval = setInterval(async () => {
+                const ress = await ping.promise.probe(node.ip, {
+                    timeout: 10,
+                    extra: ["-i", "2"],
+                });
+                const status = ress.alive ? "online" : "offline";
+                socket.emit("nodeStatus", {
+                    id: idx,
+                    data: ress,
+                });
+                if (status === "online") {
+                    let myObj = {
+                        ip: ress.numeric_host,
+                        res: ress.time,
+                        status: status,
+                        timestamp: new Date(),
+                        metadata: ress,
+                    };
+                    const timeOut = setTimeout(async () => {
+                        const hosts = new HostIP(myObj);
+                        await hosts.save();
+                    }, 5000);
+                    timeOut.unref();
+                }
+            }, node.int * 1000);
+            interval.unref();
+        });
     } catch (error) {
         console.log("socker error: ", error);
     }
