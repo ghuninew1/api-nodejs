@@ -1,4 +1,3 @@
-const { set } = require("mongoose");
 const HostIP = require("../../api/models/HostIP");
 const ping = require("ping");
 

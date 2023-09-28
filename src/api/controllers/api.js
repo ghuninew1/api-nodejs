@@ -21,11 +21,15 @@ const db = mongoose.connection;
 
 exports.findAll = async (req, res) => {
     try {
-        const dball = async () => {
-            const data = await db.db.listCollections().toArray();
-            return data;
-        };
-        const data = await dball();
+        const dbAll = await db.db.listCollections().toArray();
+        const data = dbAll.map((item,idx) => {
+            return item = {
+                name: item.name,
+                type: item.type,
+                idx: idx,
+                option: item.options.timeseries && item.options,
+            }
+        });      
         if (data.length === 0) {
             res.status(404).json({ message: "Find Fail" });
         } else {
@@ -39,9 +43,20 @@ exports.findAll = async (req, res) => {
 exports.findOne = async (req, res) => {
     try {
         const name = req.params.name;
+        let limit = parseInt(req.query.limit);
+        const sort = req.query.sort;
+        const order = req.query.order;   
         if (dbName[name]) {
-            const data = await db.db.collection(name).find({}).toArray();
-            data ? res.status(200).json(data) : res.status(404).json({ message: "Find Fail" });
+            await dbName[name]
+                .find({})
+                .limit(limit ? (limit > 1 ? limit : 0 ): 20)
+                .sort({ [sort]: order === "asc" ? 1 : -1 })
+                .exec()
+                .then((data) => {
+                    data
+                        ? res.status(200).json(data)
+                        : res.status(404).json({ message: "Find Fail" });
+                });
         } else {
             res.status(404).json({ message: "Find Fail" });
         }
@@ -55,7 +70,7 @@ exports.findById = async (req, res) => {
         const name = req.params.name;
         if (dbName[name]) {
             const id = req.params.id;
-            dbName[name]
+            await dbName[name]
                 .findById({ _id: id })
                 .exec()
                 .then((data) => {
@@ -89,7 +104,6 @@ exports.createByName = async (req, res) => {
                 res.status(201).json({
                     message: "Create Success",
                     upload: req.upload,
-                    upload_size: req.upload_size,
                     data: data,
                 });
             } else {
@@ -172,7 +186,7 @@ exports.deleteAll = async (req, res) => {
         const name = req.params.name;
         if (dbName[name]) {
             const models = async (name) => {
-                db.db.collection(name).drop();
+                await db.db.collection(name).drop();
             };
             await models(name);
             res.status(200).json({ message: "Delete Success", db: name });
@@ -202,10 +216,10 @@ exports.pingCheck = async (req, res) => {
                     timeout: 10,
                     extra: ["-i", "2"],
                 });
-                
+
                 result.push(ress);
             }
-                await res.status(200).json(result);
+            await res.status(200).json(result);
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });

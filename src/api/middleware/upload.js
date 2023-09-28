@@ -37,12 +37,13 @@ exports.progressUpload = (req, res, next) => {
             progres += chunk.length;
             const persent = Math.floor((progres / file_size) * 100).toFixed(2);
             req.upload = `${persent}%`;
+            console.log(`Upload Progress ${persent}%`);
         });
         req.on("end", () => {
-            req.upload_size = (progres / 1024 / 1024).toFixed(3) + " MB";
-            console.log(`Upload Success ${req.upload_size} , ${req.upload}`);
+            console.log(`Upload Success ${(progres / 1024 / 1024).toFixed(3)} MB , ${req.upload}`);
         });
         next();
+        
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
