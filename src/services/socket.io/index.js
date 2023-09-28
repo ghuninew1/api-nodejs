@@ -3,7 +3,6 @@ const gatherOsMetrics = require("./osMetrics");
 const { pingCheck } = require("./pingCheck");
 
 let io;
-
 const spans = [
     {
         interval: 1,
@@ -36,28 +35,18 @@ module.exports = socketIoInit = (server) => {
         });
         io.on("connection", async (socket) => {
             const transport = socket.conn.transport.name;
-
+            
             socket.conn.on("upgrade", () => {
                 const upgradedTransport = socket.conn.transport.name;
                 if (transport !== upgradedTransport) {
-                    console.log(
-                        `Socket ${socket.id} upgraded from ${transport} to ${upgradedTransport}`
-                    );
+                    console.log(`Socket ${socket.id} upgraded from ${transport} to ${upgradedTransport}`);
                 }
-                console.log("Socket upgraded");
             });
             console.log("Socket connected: " + socket.id);
 
             socket.on("disconnect", (reason) => {
                 console.log(`disconnected due to ${reason}` + " : " + socket.id);
             });
-
-            // socket.on("esm_on", () => {
-            //     socket.emit("esm_start", spans);
-            //     socket.on("esm_change", () => {
-            //         socket.emit("esm_start", spans);
-            //     });
-            // });
 
             socket.on("status", (nodeData) => {
                 pingCheck(socket, nodeData);
