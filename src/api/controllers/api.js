@@ -2,10 +2,9 @@ const Files = require("../models/Files");
 const Product = require("../models/Product");
 const Visits = require("../models/Visit");
 const Users = require("../models/Users");
-const Hostip = require("../models/HostIP");
+const Ping = require("../models/Ping");
 const Token = require("../models/Token");
 const fs = require("fs");
-const ping = require("ping");
 const config = require("../../services/config");
 const mongoose = require("mongoose");
 
@@ -14,25 +13,63 @@ const dbName = {
     files: Files,
     product: Product,
     visits: Visits,
-    hostip: Hostip,
+    ping: Ping,
     token: Token,
 };
 
 exports.findAll = async (req, res) => {
     try {
         const dbAll = await mongoose.connection.db.listCollections().toArray();
-        const data = dbAll.map((item,idx) => {
-            return item = {
-                name: item.name,
-                type: item.type,
-                idx: idx,
-                option: item.options.timeseries && item.options,
+        const datashow = req.query.data || req.body.data;
+        const db = dbAll.map((item) => item.name);
+        for (let i = 0; i < db.length; i++) {
+            if (dbName[db[i]]) {
+                const count = await dbName[db[i]].countDocuments();
+                const data = await dbName[db[i]].find({}).exec();
+                const create = await dbName[db[i]].find({}).sort({ createdAt: -1 }).limit(1).exec();
+                const lastUpdate = await dbName[db[i]]
+                    .find({})
+                    .sort({ updatedAt: -1 })
+                    .limit(1)
+                    .exec();
+                if (datashow === "true") {
+                    db[i] = {
+                        name: db[i],
+                        count: count ? count : 0,
+                        create: create[0]?.createdAt,
+                        lastupdate: lastUpdate[0]?.updatedAt,
+                        data: data,
+                    };
+                } else {
+                    db[i] = {
+                        name: db[i],
+                        count: count ? count : 0,
+                        create: create[0]?.createdAt,
+                        lastupdate: lastUpdate[0]?.updatedAt,
+                    };
+                }
+            } else {
+                db[i] = { name: db[i], count: 0 };
             }
-        });      
-        if (data.length === 0) {
-            res.status(404).json({ message: "Find Fail" });
+        }
+        res.status(200).json(db);
+    } catch (err) {
+        res.status(500).json({ msg: "Server Error: " + err });
+    }
+};
+
+exports.findByName = async (req, res) => {
+    try {
+        const name = req.params.name;
+        if (dbName[name]) {
+            const data = await dbName[name].find({}).exec();
+            if (data.length === 0) {
+                res.status(404).json({ message: "Find Fail" });
+            } else {
+                res.status(200).json(data);
+            }
         } else {
-            res.status(200).json(data);
+            res.status(404).json({ message: "Find Fail" });
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
@@ -44,18 +81,18 @@ exports.findOne = async (req, res) => {
         const name = req.params.name;
         let limit = parseInt(req.query.limit);
         const sort = req.query.sort;
-        const order = req.query.order;   
+        const order = req.query.order;
         if (dbName[name]) {
-            await dbName[name]
+            const data = await dbName[name]
                 .find({})
-                .limit(limit ? (limit > 1 ? limit : 0 ): 20)
+                .limit(limit ? (limit > 1 ? limit : 0) : 20)
                 .sort({ [sort]: order === "asc" ? 1 : -1 })
-                .exec()
-                .then((data) => {
-                    data
-                        ? res.status(200).json(data)
-                        : res.status(404).json({ message: "Find Fail" });
-                });
+                .exec();
+            if (data.length === 0) {
+                res.status(404).json({ message: "Find Fail" });
+            } else {
+                res.status(200).json(data);
+            }
         } else {
             res.status(404).json({ message: "Find Fail" });
         }
@@ -92,10 +129,10 @@ exports.createByName = async (req, res) => {
             const data = req.body;
             if (req.file) {
                 data.file = req.file.filename;
-                data.file_size = req.file.size;
-                data.file_originalname = req.file.originalname;
-                data.file_path = req.file.path;
-                data.file_mimetype = req.file.mimetype;
+                data.size = req.file.size;
+                data.originalname = req.file.originalname;
+                data.path = req.file.path;
+                data.mimetype = req.file.mimetype;
             }
             const fileCreate = new dbName[name](data);
             await fileCreate.save();
@@ -124,10 +161,10 @@ exports.updateByid = async (req, res) => {
             const id = req.params.id;
             if (req.file) {
                 data.file = req.file.filename;
-                data.file_size = req.file.size;
-                data.file_originalname = req.file.originalname;
-                data.file_path = req.file.path;
-                data.file_mimetype = req.file.mimetype;
+                data.size = req.file.size;
+                data.originalname = req.file.originalname;
+                data.path = req.file.path;
+                data.mimetype = req.file.mimetype;
             }
             const fileUpdate = await dbName[name].findOneAndUpdate({ _id: id }, data).exec();
             if (fileUpdate?.file) {
@@ -191,61 +228,6 @@ exports.deleteAll = async (req, res) => {
             res.status(200).json({ message: "Delete Success", db: name });
         } else {
             res.status(404).json({ message: "Delete Fail" });
-        }
-    } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
-    }
-};
-
-exports.pingCheck = async (req, res) => {
-    try {
-        const ip = req.query.ip;
-        const ipss = ip.split(",");
-
-        if (ipss.length === 1) {
-            const ress = await ping.promise.probe(ip, {
-                timeout: 10,
-                extra: ["-i", "2"],
-            });
-            await res.status(200).json(ress);
-        } else {
-            let result = [];
-            for (let i = 0; i < ipss.length; i++) {
-                const ress = await ping.promise.probe(ipss[i], {
-                    timeout: 10,
-                    extra: ["-i", "2"],
-                });
-
-                result.push(ress);
-            }
-            await res.status(200).json(result);
-        }
-    } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
-    }
-};
-
-exports.ipPublic = async (req, res) => {
-    try {
-        const ip = req.query.ip;
-        if (ip) {
-            const ipinfo = `https://ipinfo.io/${ip}/json?token=f44742fe54a2b2`;
-            const Response = await fetch(ipinfo);
-            const data = await Response.json();
-            if (data.error) {
-                res.status(404).json({ message: "Not Found" });
-            } else {
-                res.status(200).json(data);
-            }
-        } else {
-            const url = "https://ipinfo.io/json?token=f44742fe54a2b2";
-            const Response = await fetch(url);
-            const data = await Response.json();
-            if (data.error) {
-                res.status(404).json({ message: "Not Found" });
-            } else {
-                res.status(200).json(data);
-            }
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });

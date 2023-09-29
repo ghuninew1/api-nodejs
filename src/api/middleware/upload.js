@@ -12,21 +12,7 @@ const storage = multer.diskStorage({
     },
 });
 
-exports.upload = (req, res, next) => {
-    const uploads = multer({
-        storage: storage,
-        limits: {
-            fileSize: 1024 * 1024 * 1024 * 1024 * 10 // 10 GB
-        },
-    }).single("file");
-    uploads(req, res, function (err) {
-        if (err) {
-            res.status(500).json({ message: "File too large" , err});
-        } else {
-            next();
-        }
-    });
-};
+exports.upload = multer({ storage: storage }).single('file')
 
 exports.progressUpload = (req, res, next) => {
     try {

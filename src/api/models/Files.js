@@ -5,22 +5,11 @@ const filesSchema = new mongoose.Schema(
         name: {
             type: String,
         },
-        file: {
-            type: String,
-            default: 'noimage.jpg',
-        },
-        file_size: {
-            type: String,
-        },
-        file_originalname: {
-            type: String,
-        },
-        file_path: {
-            type: String,
-        },
-        file_mimetype: {
-            type: String,
-        },
+        file: String,
+        size: String,
+        originalname: String,
+        path: String,
+        mimetype: String,
     },
     {
         timestamps: true,
