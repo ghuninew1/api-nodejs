@@ -1,4 +1,4 @@
-// "use strict";
+"use strict";
 
 Chart.defaults.global.defaultFontSize = 10;
 Chart.defaults.global.animation.duration = 500;
@@ -337,10 +337,33 @@ const Websockets = () => {
     });
 
     socket.on("nodeStatus", (data) => {
-        let nodeStatus = document.querySelector(`#node-${data.id}`);
-        nodeStatus.innerHTML = JSON.stringify(
-            data.data.host + " ip: " + data.data.numeric_host + " res: " + data.data.time
-        );
+        if (data.retention === 60 && data.interval === 1) {
+            console.log("nodeStatus", data);
+            data.data.forEach((element,idx) => {
+                let nodeStatus = document.createElement("div");
+                nodeStatus.setAttribute("class", "nodeStatus");
+                nodeStatus.setAttribute("id", element.id);
+                let valueStatus =
+                    element.status !== null &&
+                    (element.host +
+                        " ip: " +
+                        element.ip +
+                        " res: " +
+                        element.res +
+                        " status: " +
+                        element.status);
+                let textNode = document.createTextNode(valueStatus);
+                nodeStatus.appendChild(textNode);
+                let nodeData = document.getElementById("node-0")
+                if (nodeData.childElementCount > data.data.length) {
+                    nodeData.removeChild(nodeData.childNodes[0]);
+                    nodeData.appendChild(nodeStatus);
+                } else {
+                    nodeData.appendChild(nodeStatus);
+                } 
+            });
+        }
+
     });
 
     socket.on("esm_stats", async function (data) {

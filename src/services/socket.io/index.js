@@ -1,6 +1,7 @@
 const { Server } = require("socket.io");
 const gatherOsMetrics = require("./osMetrics");
-const { pingCheck } = require("./pingCheck");
+const pingMetrics = require("./pingMetrics");
+// const { pingCheck } = require("./pingCheck");
 
 let io;
 const spans = [
@@ -35,11 +36,13 @@ module.exports = socketIoInit = (server) => {
         });
         io.on("connection", async (socket) => {
             const transport = socket.conn.transport.name;
-            
+
             socket.conn.on("upgrade", () => {
                 const upgradedTransport = socket.conn.transport.name;
                 if (transport !== upgradedTransport) {
-                    console.log(`Socket ${socket.id} upgraded from ${transport} to ${upgradedTransport}`);
+                    console.log(
+                        `Socket ${socket.id} upgraded from ${transport} to ${upgradedTransport}`
+                    );
                 }
             });
             console.log("Socket connected: " + socket.id);
@@ -48,13 +51,10 @@ module.exports = socketIoInit = (server) => {
                 console.log(`disconnected due to ${reason}` + " : " + socket.id);
             });
 
-            socket.on("status", (nodeData) => {
-                pingCheck(socket, nodeData);
-            });
-
             spans.forEach((span) => {
                 span.os = [];
                 span.responses = [];
+
                 socket.on("esm_on", () => {
                     socket.emit("esm_start", spans);
                     socket.on("esm_change", () => {
@@ -64,6 +64,17 @@ module.exports = socketIoInit = (server) => {
                         gatherOsMetrics(socket, span);
                     }, span.interval * 1000);
                     interval.unref();
+                });
+                span.data = [];
+                socket.on("status", (nodeData) => {
+                    span.length = Object.values(nodeData).length;
+                    Object.values(nodeData).forEach((node) => {
+                        const interval = setInterval(() => {
+                            span.ip = node.ip;
+                            pingMetrics(socket, span);
+                        }, node.int * 1000);
+                        interval.unref();
+                    });
                 });
             });
         });
