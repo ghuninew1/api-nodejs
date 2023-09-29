@@ -1,7 +1,7 @@
 const ping = require("ping");
 const sendMetrics = require("./sendMetricsPing");
 
-module.exports = async (socket, span) => {
+module.exports = async (socket, span, idx) => {
     const starttime = process.hrtime();
     const last = span.responses[span.responses.length - 1];
 
@@ -25,22 +25,10 @@ module.exports = async (socket, span) => {
         timeout: 10,
         extra: ["-i", "2"],
     });
-    
-    const status = pings.alive ? "online" : "offline";
-    span.data.push({
-        id: span.data.length ? span.data[span.data.length - 1].id + 1 : 0,
-        ip: pings.numeric_host,
-        host: pings.host,
-        res: pings.time,
-        status: status,
-        min: pings.min,
-        max: pings.max,
-        avg: pings.avg,
-        loss: pings.packetLoss,
-        timestamp: new Date(),
-    });
 
-    if (span.data.length >= span.length) span.data.shift();
+    span.data = pings;
+    span.id = idx;
+    // if (span.data.length >= span.length) span.data.shift();
     // todo: I think this check should be moved somewhere else
     if (span.responses[0] && span.responses.length > span.retention) span.responses.shift();
 

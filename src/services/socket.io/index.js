@@ -65,13 +65,13 @@ module.exports = socketIoInit = (server) => {
                     }, span.interval * 1000);
                     interval.unref();
                 });
-                span.data = [];
+
                 socket.on("status", (nodeData) => {
                     span.length = Object.values(nodeData).length;
-                    Object.values(nodeData).forEach((node) => {
+                    Object.values(nodeData).forEach((node, idx) => {
                         const interval = setInterval(() => {
                             span.ip = node.ip;
-                            pingMetrics(socket, span);
+                            pingMetrics(socket, span, idx);
                         }, node.int * 1000);
                         interval.unref();
                     });
