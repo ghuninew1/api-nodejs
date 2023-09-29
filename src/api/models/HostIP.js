@@ -6,8 +6,8 @@ const hostdbSchema = new Schema(
         ip: { type: String },
         res: { type: Number },
         status: { type: String },
-        timestamp:{type: Date},
-        metadata:{type: Object}
+        timestamp: { type: Date },
+        metadata: { type: Object },
     },
     {
         timeseries: {

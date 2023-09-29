@@ -1,7 +1,6 @@
 const HostIP = require("../../api/models/HostIP");
 const ping = require("ping");
 
-let count = 0;
 exports.pingCheck = async (socket, nodeData) => {
     try {
         Object.values(nodeData).forEach(async (node, idx) => {
@@ -16,7 +15,7 @@ exports.pingCheck = async (socket, nodeData) => {
                     data: ress,
                 });
                 if (status === "online") {
-                    let myObj = {
+                    const myObj = {
                         ip: ress.numeric_host,
                         res: ress.time,
                         status: status,
@@ -24,9 +23,13 @@ exports.pingCheck = async (socket, nodeData) => {
                         metadata: ress,
                     };
                     const timeOut = setTimeout(async () => {
-                        const hosts = new HostIP(myObj);
-                        await hosts.save();
-                    }, 5000);
+                        try {
+                            const hosts = new HostIP(myObj);
+                            await hosts.save();
+                        } catch (error) {
+                            console.log("error: ", error);
+                        }
+                    }, node.int * 5000);
                     timeOut.unref();
                 }
             }, node.int * 1000);

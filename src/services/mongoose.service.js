@@ -1,15 +1,12 @@
 const mongoose = require("mongoose");
 const config = require("./config");
-let count = 0;
 
+let count = 0;
 const options = {
-    // autoIndex: true, // Don't build indexes
     useNewUrlParser: true,
-    // useCreateIndex: true,
     useUnifiedTopology: true,
     user: config.mongo_user,
     pass: config.mongo_pass,
-    // compressors: 'zlib',
 };
 
 const connectWithRetry = async () => {

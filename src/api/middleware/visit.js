@@ -3,9 +3,10 @@ const visits = require("../models/Visit");
 exports.visitUpdate = async (req, res, next) => {
     try {
         const url = req.url;
-        const ips = req.connection.remoteAddress || req.ip;
+        const ips = req.ip || req.connection.remoteAddress;
         const ip = ips.split(":").pop();
         const visit = await visits.findOne({ url: url });
+        
         if (visit && ip === visit?.ip) {
             await visits.updateOne(
                 { url: url },

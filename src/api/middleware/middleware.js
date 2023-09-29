@@ -4,7 +4,7 @@ const fs = require("fs");
 exports.middleware = async (req, res, next) => {
     try {
         res.startAt = process.hrtime();
-        const ip = req.connection.remoteAddress || req.ip;
+        const ip = req.ip || req.connection.remoteAddress;
         res.header("X-powered-by", "GhuniNew");
         res.on("finish", async () => {
             const elapsed = process.hrtime(res.startAt);

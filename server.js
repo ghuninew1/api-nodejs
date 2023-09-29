@@ -24,6 +24,7 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({limit: "150mb", extended: true, parameterLimit: 50000}));
 app.use(express.static(path.join(__dirname, "./public")));
 app.use(middleware);
+app.set('trust proxy', true);
 
 // routes
 const indexData = async (req, res) => {
@@ -53,23 +54,6 @@ app.use((err, req, res) => {
     res.status(500).json({ message: "Server Error @GhuniNew" , err});
 });
 
-//unix socket
-// const unix = http.createServer(app);
-// if (fs.existsSync(config.unix_socket)) {
-//     fs.unlink(config.unix_socket, (err) => {
-//         if (err) {
-//             console.error(err);
-//         }
-//         unix.listen(config.unix_socket, () => {
-//             console.log(`app running on socket ${config.unix_socket}`);
-//         });
-//     });
-// } else {
-//     unix.listen(config.unix_socket, () => {
-//         console.log(`app running on socket ${config.unix_socket}`);
-//     });
-// }
-
 // http server
 const server = http.createServer(app);
 server.listen(config.port, () => {
@@ -77,6 +61,7 @@ server.listen(config.port, () => {
     const address = addr.address === "::" ? "localhost" : addr.address;
     console.log(`app running on ` + "http://" + address + ":" + addr.port);
 });
+
 // socket.io
 socketIoInit(server);
 exports.app = app;
