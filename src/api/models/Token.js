@@ -1,4 +1,4 @@
-const mongoose = require("../../services/mongoose.service").mongoose;
+const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 const tokenSchema = new Schema(

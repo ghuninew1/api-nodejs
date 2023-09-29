@@ -1,4 +1,3 @@
-const mongoose = require("../../services/mongoose.service").mongoose;
 const Files = require("../models/Files");
 const Product = require("../models/Product");
 const Visits = require("../models/Visit");
@@ -8,6 +7,7 @@ const Token = require("../models/Token");
 const fs = require("fs");
 const ping = require("ping");
 const config = require("../../services/config");
+const mongoose = require("mongoose");
 
 const dbName = {
     users: Users,
@@ -17,11 +17,10 @@ const dbName = {
     hostip: Hostip,
     token: Token,
 };
-const db = mongoose.connection;
 
 exports.findAll = async (req, res) => {
     try {
-        const dbAll = await db.db.listCollections().toArray();
+        const dbAll = await mongoose.connection.db.listCollections().toArray();
         const data = dbAll.map((item,idx) => {
             return item = {
                 name: item.name,

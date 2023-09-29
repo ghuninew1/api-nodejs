@@ -1,7 +1,6 @@
 const { Server } = require("socket.io");
 const gatherOsMetrics = require("./osMetrics");
 const pingMetrics = require("./pingMetrics");
-// const { pingCheck } = require("./pingCheck");
 
 let io;
 const spans = [
@@ -19,7 +18,7 @@ const spans = [
     },
 ];
 
-module.exports = socketIoInit = (server) => {
+module.exports = socketIoInit = async (server) => {
     if (io === null || io === undefined) {
         io = new Server(server, {
             path: "/ws",
@@ -33,7 +32,8 @@ module.exports = socketIoInit = (server) => {
                 windowBits: 14, // defaults to 15
                 memLevel: 7, // defaults to 8
             },
-        });
+        });       
+
         io.on("connection", async (socket) => {
             const transport = socket.conn.transport.name;
 

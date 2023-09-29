@@ -1,4 +1,4 @@
-const mongoose = require("../../services/mongoose.service").mongoose;
+const mongoose = require("mongoose");
 
 const schemaOptions = {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },

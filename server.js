@@ -4,7 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 
-const config = require("./src/services/config");
+const {connect, config} = require("./src/services/config");
 const authRoute = require("./src/routes/auth");
 const apiRoute = require("./src/routes/api");
 const socketIoInit = require("./src/services/socket.io/index");
@@ -12,6 +12,7 @@ const { visitUpdate } = require("./src/api/middleware/visit");
 const { middleware } = require("./src/api/middleware/middleware");
 
 const app = express();
+connect();
 
 // view engine setup
 app.set("views", path.join(__dirname, "./public"));
