@@ -4,10 +4,10 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 
-const {connect, config} = require("./src/services/config");
+const { connect, config } = require("./src/services/config");
 const authRoute = require("./src/routes/auth");
 const apiRoute = require("./src/routes/api");
-const socketIoInit = require("./src/services/socket.io/index");
+const socketIoInit = require("./src/services/socket");
 const { visitUpdate } = require("./src/api/middleware/visit");
 const { middleware } = require("./src/api/middleware/middleware");
 
@@ -64,5 +64,8 @@ server.listen(config.port, () => {
 });
 
 // socket.io
-socketIoInit(server);
+app.io = socketIoInit(server);
+app.io.engine.generateId = (req) => {
+    return req._query["nodeId"];
+}
 exports.app = app;

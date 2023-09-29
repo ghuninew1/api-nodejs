@@ -26,16 +26,10 @@ const Websockets = () => {
         path: "/ws",
         transports: ["websocket", "polling", "webtransport"],
         cors: { origin: "*", credentials: true },
-        transportOptions: {
-            webtransport: {
-                hostname: "127.0.0.1",
-            },
-        },
     });
 
     socket.on("connect", () => {
         const transport = socket.io.engine.transport.name;
-
         socket.io.engine.on("upgrade", () => {
             const upgradedTransport = socket.io.engine.transport.name;
             if (transport !== upgradedTransport) {
@@ -339,7 +333,9 @@ const Websockets = () => {
     socket.on("nodeStatus", (data) => {
         if (data.retention === 60 && data.interval === 1) {
             let nodeData = document.getElementById(`node-${data.id}`);
-            nodeData.textContent = data.data.host && data.data.host + " " + data.data.numeric_host + " " + data.data.time + "ms";
+            nodeData.textContent =
+                data.data.host &&
+                data.data.host + " " + data.data.numeric_host + " " + data.data.time + "ms";
         }
     });
 

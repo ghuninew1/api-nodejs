@@ -1,7 +1,6 @@
 const pidusage = require("pidusage");
 const os = require("os");
 const v8 = require("v8");
-// const eventLoopStats = require("event-loop-stats"); 
 const sendMetrics = require("./sendMetrics");
 const { response } = require("express");
 

@@ -1,6 +1,6 @@
 const { Server } = require("socket.io");
-const gatherOsMetrics = require("./osMetrics");
-const pingMetrics = require("./pingMetrics");
+const gatherOsMetrics = require("./socket.io/osMetrics");
+const pingMetrics = require("./socket.io/pingMetrics");
 
 let io;
 const spans = [
@@ -18,7 +18,7 @@ const spans = [
     },
 ];
 
-module.exports = socketIoInit = async (server) => {
+module.exports = (server) => {
     if (io === null || io === undefined) {
         io = new Server(server, {
             path: "/ws",
@@ -32,11 +32,10 @@ module.exports = socketIoInit = async (server) => {
                 windowBits: 14, // defaults to 15
                 memLevel: 7, // defaults to 8
             },
-        });       
+        });
 
         io.on("connection", async (socket) => {
             const transport = socket.conn.transport.name;
-
             socket.conn.on("upgrade", () => {
                 const upgradedTransport = socket.conn.transport.name;
                 if (transport !== upgradedTransport) {
@@ -46,15 +45,28 @@ module.exports = socketIoInit = async (server) => {
                 }
             });
             console.log("Socket connected: " + socket.id);
-
             socket.on("disconnect", (reason) => {
                 console.log(`disconnected due to ${reason}` + " : " + socket.id);
+            });
+
+            socket.on("status", (nodeData) => {
+                const span = {};
+                span.responses = [];
+                span.retention = 60;
+                span.interval = 1;
+                span.length = Object.values(nodeData).length;
+                Object.values(nodeData).forEach((node, idx) => {
+                    const interval = setInterval(() => {
+                        span.ip = node.ip;
+                        pingMetrics(socket, span, idx);
+                    }, node.int * 1000);
+                    interval.unref();
+                });
             });
 
             spans.forEach((span) => {
                 span.os = [];
                 span.responses = [];
-
                 socket.on("esm_on", () => {
                     socket.emit("esm_start", spans);
                     socket.on("esm_change", () => {
@@ -65,19 +77,9 @@ module.exports = socketIoInit = async (server) => {
                     }, span.interval * 1000);
                     interval.unref();
                 });
-
-                socket.on("status", (nodeData) => {
-                    span.length = Object.values(nodeData).length;
-                    Object.values(nodeData).forEach((node, idx) => {
-                        const interval = setInterval(() => {
-                            span.ip = node.ip;
-                            pingMetrics(socket, span, idx);
-                        }, node.int * 1000);
-                        interval.unref();
-                    });
-                });
             });
         });
+
         return io;
     } else {
         console.log("Socket.io already initialized");
