@@ -15,7 +15,7 @@ const { upload, progressUpload } = require("../api/middleware/upload");
 const { visitUpdate } = require("../api/middleware/visit");
 
 module.exports = (app) => {
-    app.get("/api", /* auth, */ findAll);
+    app.get("/api", auth, findAll);
     app.get("/api/:name", auth, findOne);
     app.get("/api/:name/:id", auth, findById);
     app.post("/api/:name", auth, progressUpload, upload, createByName);
@@ -26,7 +26,7 @@ module.exports = (app) => {
     app.get("/ping", /* auth, */ pingCheck);
     app.get("/ip", /* auth, */ visitUpdate, ipPublic);
     app.post("/line", auth, lineNotify);
-    app.post("/pingsave", /*  auth, */ insertTimeSeries);
+    app.post("/pingsave",  auth, insertTimeSeries);
     app.get("/pingsave", /* auth, */ getIpTimeSeries);
 
     app.get("/visit", /* auth, */ visitPageView);

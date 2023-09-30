@@ -8,7 +8,6 @@
     "license": "MIT",
     "scripts": {
         "dev": "nodemon server.js",
-        "open": "open http://localhost:3001",
         "pm2": "pm2 start server.js --name api-nodejs",
         "dev2": "bun --watch run server.js",
         "start": "node server.js"

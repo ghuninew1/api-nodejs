@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
     try {
-        const { name, password } = req.body;
+        const { name, password, email } = req.body;
         let user = await User.findOne({ name });
         if (user) {
             return res.status(400).json({ msg: "User already exists: " + user.name });
@@ -14,10 +14,11 @@ exports.register = async (req, res) => {
         user = new User({
             name,
             password,
+            email,
         });
         user.password = await bcrypt.hash(password, salt);
         await user.save();
-        res.status(201).json({ msg: "User Created: " + user.name });
+        res.status(201).json(user.name);
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
@@ -69,8 +70,8 @@ exports.generateToken = async (req, res) => {
                         name: token.name,
                     },
                 };
-                token.token = jwt.sign(payload, "gnewsecret", { expiresIn: "7d" }),
-                await token.save();
+                (token.token = jwt.sign(payload, "gnewsecret", { expiresIn: "7d" })),
+                    await token.save();
                 res.status(201).json({ msg: "Token Created: " + token.token });
             }
         }
@@ -99,6 +100,17 @@ exports.genToken = async (req, res) => {
                 res.status(201).json({ msg: "Token Created: " + token.name });
             }
         }
+    } catch (err) {
+        res.status(500).json({ msg: "Server Error: " + err });
+    }
+};
+
+exports.currentUser = async (req, res) => {
+    try {
+        //code
+        const user = await User.findOne({ name: req.user.name }).select("-password").exec();
+
+        res.status(200).json(user);
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
