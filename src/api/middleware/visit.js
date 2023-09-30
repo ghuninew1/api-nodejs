@@ -1,4 +1,5 @@
-const visits = require("../models/Visit");
+const db = require("../models");
+const visits = db.visit;
 
 exports.visitUpdate = async (req, res, next) => {
     try {

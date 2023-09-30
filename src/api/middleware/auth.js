@@ -1,29 +1,36 @@
 const jwt = require("jsonwebtoken");
-const Tokens = require("../models/Token");
+const db = require("../models");
 const bcrypt = require("bcryptjs");
+const config = require("../config/auth.config");
 
 exports.auth = async (req, res, next) => {
     try {
-        const token = req.headers["authtoken"];
-        const name = req.headers["token"];
-        if (!token && !name) {
+        const token = req?.headers["authtoken"];
+        if (!token) {
             return res.status(401).json({ msg: "No token, authorization denied" });
-        } 
-        if (name) {
-            let user = await Tokens.findOneAndUpdate({ name }, { new: true });
-            const isMatch = bcrypt.compare(name, user.token);
-            if (!isMatch) {
-                return res.status(400).json({ msg: "Invalid Credentials Password" });
-            } else {
-                next();
-            }
         }
-        else {
-            const decoded = jwt.verify(token, "gnewsecret");
+        jwt.verify(token, config.secret, (err, decoded) => {
+            if (err) {
+                return res.status(403).json({ msg: "Token is not valid" });
+            }
             req.user = decoded.user;
             next();
-        }
+        });
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
+};
+
+exports.verifyToken = async (req, res, next) => {
+    let token = req?.headers["authtoken"];
+    if (!token) {
+        return res.status(403).send({ message: "No token provided!" });
+    }
+    jwt.verify(token, config.secret, (err, decoded) => {
+        if (err) {
+            return catchError(err, res);
+        }
+        req.userId = decoded.id;
+        next();
+    });
 };
