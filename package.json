@@ -3,7 +3,6 @@
     "version": "1.4.0",
     "description": "https://github.com/ghuninew1",
     "main": "server.js",
-    "type": "commonjs",
     "author": "GhuniNew",
     "license": "MIT",
     "scripts": {

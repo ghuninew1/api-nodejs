@@ -3,10 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
+const { readdirSync } = require("fs");
 
-const { connect, config } = require("./src/services/config");
-const authRoute = require("./src/routes/auth");
-const apiRoute = require("./src/routes/api");
+const { config, connect } = require("./src/api/config/db.config");
 const socketIoInit = require("./src/services/socket");
 const { visitUpdate } = require("./src/api/middleware/visit");
 const { middleware } = require("./src/api/middleware/middleware");
@@ -22,28 +21,27 @@ app.set("view engine", "html");
 // middlewares
 app.use(bodyParser.json({ limit: "150mb" }));
 app.use(cors({ origin: "*" }));
-app.use(bodyParser.urlencoded({limit: "150mb", extended: true, parameterLimit: 50000}));
+app.use(bodyParser.urlencoded({ limit: "150mb", extended: true, parameterLimit: 50000 }));
 app.use(express.static(path.join(__dirname, "./public")));
 app.use(middleware);
-app.set('trust proxy', true);
+app.set("trust proxy", true);
 
 // routes
 const indexData = async (req, res) => {
-    res.status(200).json({ message: "API GhuniNew"});
+    res.status(200).json({ message: "API GhuniNew" });
 };
-
 const wsData = async (req, res) => {
     res.status(200).render("ws.html");
 };
 
 //root route
-app.get("/",visitUpdate, indexData );
+app.get("/", visitUpdate, indexData);
 
-app.get("/ws",visitUpdate, wsData);
+app.get("/ws", visitUpdate, wsData);
 
-// routes Api
-authRoute(app);
-apiRoute(app);
+readdirSync("./src/routes")
+    .filter((f) => f.slice(-8) === "route.js")
+    .map((r) => app.use("/", require("./src/routes/" + r)));
 
 // catch 404 and forward to error handler
 app.use((req, res) => {
@@ -52,7 +50,7 @@ app.use((req, res) => {
 
 // error handler
 app.use((err, req, res) => {
-    res.status(500).json({ message: "Server Error @GhuniNew" , err});
+    res.status(500).json({ message: "Server Error @GhuniNew", err });
 });
 
 // http server
@@ -67,5 +65,5 @@ server.listen(config.port, () => {
 app.io = socketIoInit(server);
 app.io.engine.generateId = (req) => {
     return req._query["nodeId"];
-}
+};
 exports.app = app;

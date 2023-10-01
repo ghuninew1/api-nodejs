@@ -7,11 +7,11 @@ exports.auth = async (req, res, next) => {
     try {
         const token = req?.headers["authtoken"];
         if (!token) {
-            return res.status(401).json({ msg: "No token, authorization denied" });
+            return res.status(403).json({ msg: "No token, authorization denied" });
         }
         jwt.verify(token, config.secret, (err, decoded) => {
             if (err) {
-                return res.status(403).json({ msg: "Token is not valid" });
+                return res.status(401).json({ msg: "Token is not valid" });
             }
             req.user = decoded.user;
             next();
@@ -19,18 +19,4 @@ exports.auth = async (req, res, next) => {
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
-};
-
-exports.verifyToken = async (req, res, next) => {
-    let token = req?.headers["authtoken"];
-    if (!token) {
-        return res.status(403).send({ message: "No token provided!" });
-    }
-    jwt.verify(token, config.secret, (err, decoded) => {
-        if (err) {
-            return catchError(err, res);
-        }
-        req.userId = decoded.id;
-        next();
-    });
 };

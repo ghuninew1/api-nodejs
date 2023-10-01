@@ -2,9 +2,8 @@ const mongoose = require("mongoose");
 
 const filesSchema = new mongoose.Schema(
     {
-        name: {
-            type: String,
-        },
+        id: { type: Number, default: Math.random()*1000 + 1 },
+        name: String,
         file: String,
         size: String,
         originalname: String,
@@ -16,4 +15,7 @@ const filesSchema = new mongoose.Schema(
         versionKey: false,
     }
 );
-module.exports = mongoose.model("files", filesSchema, "files");
+
+filesSchema.index({ id: 1 }, { unique: true });
+
+module.exports = mongoose.model("files", filesSchema);

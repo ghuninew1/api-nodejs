@@ -1,19 +1,15 @@
 const fs = require("fs");
-const ping = require("ping");
-const config = require("../../services/config");
-const { mongoose } = require("../models");
+const mongoose = require("mongoose");
 const db = require("../models");
 
 exports.findAll = async (req, res) => {
     try {
         const dbAll = await mongoose.connection.db.listCollections().toArray();
-        const data = dbAll.map((item, idx) => {
-            return (item = {
-                name: item.name,
-                type: item.type,
-                idx: idx,
-                option: item.options.timeseries && item.options,
-            });
+        const data = dbAll.map((item) => {
+            const name = item.name && item.name;
+            const type = item.type && item.type;
+            const timeseries = item.options.timeseries && item.options.timeseries;
+            return (item = { name, type, timeseries });
         });
         if (data.length === 0) {
             res.status(404).json({ message: "Find Fail" });

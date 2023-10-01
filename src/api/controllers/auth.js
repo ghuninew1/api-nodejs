@@ -5,17 +5,37 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
     try {
         const { username, password, email } = req.body;
-        let user = await db.user.findOne({ username });
+        const roles = req.body.roles ? req.body.roles : 100;
+        let user = await db.users.findOne({ username });
         if (user) {
             return res.status(400).json({ msg: "User already exists: " + user.username });
         }
         const salt = await bcrypt.genSalt(10);
-        user = new db.user({
-            username,
-            password,
-            email,
-        });
-
+        if (roles === "105") {
+            user = new db.users({
+                username,
+                password,
+                email,
+                roles: [
+                    {
+                        role: "admin",
+                        id: 105,
+                    },
+                ],
+            });
+        } else {
+            user = new db.users({
+                username,
+                password,
+                email,
+                roles: [
+                    {
+                        role: "user",
+                        id: 100,
+                    },
+                ],
+            });
+        }
         user.password = await bcrypt.hash(password, salt);
         await user.save();
         let payload = {
@@ -30,7 +50,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
-        let user = await db.user.findOneAndUpdate({ username }, { new: true });
+        let user = await db.users.findOneAndUpdate({ username }, { new: true });
         if (user) {
             const isMatch = bcrypt.compare(password, user.password);
 
@@ -122,11 +142,13 @@ exports.login = async (req, res) => {
     }
 };
 
-
 exports.currentUser = async (req, res) => {
     try {
-        const user = await db.user.findOne({ username: req.user.username }).select("-password").exec();
-        console.log(req.user);
+        const user = await db.users
+            .findOne({ username: req.user.username })
+            .select("-password")
+            .exec();
+        // console.log(req.user);
         if (!user) {
             return res.status(400).json({ msg: "User not found" });
         } else {

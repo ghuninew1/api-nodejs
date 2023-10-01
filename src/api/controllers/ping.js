@@ -1,6 +1,6 @@
 const ping = require("ping");
-const Ping = require("../models/ping.model");
-const config = require("../../services/config");
+const db = require("../models/ping.model");
+const Ping = db.ping;
 
 exports.pingCheck = async (req, res) => {
     try {

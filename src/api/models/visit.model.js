@@ -1,9 +1,5 @@
 const mongoose = require("mongoose");
 
-const schemaOptions = {
-    timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
-    versionKey: false
-};
 const visitSchema = new mongoose.Schema(
     {
         url: {
@@ -18,7 +14,12 @@ const visitSchema = new mongoose.Schema(
             type: String,
         },
     },
-    schemaOptions);
-const visits = mongoose.model("visits", visitSchema, "visits");
+    {
+        timestamps: true,
+        versionKey: false,
+    }
+);
 
-module.exports = visits;
+visitSchema.index({ url: 1 }, { unique: true });
+
+module.exports = mongoose.model("Visit", visitSchema);

@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
 
-const { Schema } = mongoose;
-const pingSchema = new Schema(
+const pingSchema = new mongoose.Schema(
     {
         ip: String,
         res: Number,
-        timestamp: Date,
+        createdAt: { type: Date, default: Date.now},
         metadata: {
             max: Number,
             min: Number,
@@ -15,16 +14,15 @@ const pingSchema = new Schema(
     },
     {
         timeseries: {
-            timeField: "timestamp",
+            timeField: "createdAt",
             metaField: "metadata",
             granularity: "hours",
         },
         versionKey: false,
+        timestamps: false,
     }
 );
-//create index for timestamp
-pingSchema.index({ timestamp: 1 }, { unique: true });
 
-const hostip = mongoose.model("ping", pingSchema, "ping");
+pingSchema.index({ ip: 1, createdAt: 1 });
 
-module.exports = hostip;
+module.exports = mongoose.model("Ping", pingSchema);

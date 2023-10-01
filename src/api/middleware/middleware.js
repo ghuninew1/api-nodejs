@@ -1,29 +1,9 @@
-const path = require("path");
-const fs = require("fs");
-
+// Desc: Middleware for all routes
 exports.middleware = async (req, res, next) => {
     try {
-        res.startAt = process.hrtime();
-        const ip = req.ip || req.connection.remoteAddress;
         res.header("X-powered-by", "GhuniNew");
-        res.on("finish", async () => {
-            const elapsed = process.hrtime(res.startAt);
-            const ms = elapsed[0] * 1000 + elapsed[1] / 1000000;
-            // const fsSync = fs.createWriteStream(path.join(__dirname, "../logs/access.log"), {
-            //     flags: "a",
-            //     encoding: "utf8",
-            // });
-            // const log = `[${req.method}] : ${res.statusCode} : [${ms.toFixed(
-            //     3
-            // )} ms] : ${new Date().toLocaleString("th-TH")} : ${ip} : ${req.originalUrl} ${
-            //     req.headers["user-agent"]
-            // }`;
-            // fsSync.write(log + "\n");
-            console.log(
-                `${ip} [${req.method}] : ${res.statusCode} : ${req.originalUrl} :[${ms.toFixed(3)} ms]`
-            );
-            // fsSync.end();
-        });
+        res.header("X-Server-IP", req.ip || req.ips);
+        res.header("X-Server-Host", req.hostname);
         next();
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
