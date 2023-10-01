@@ -1,6 +1,5 @@
 const { pingCheck, ipPublic, insertTimeSeries, getIpTimeSeries } = require('../api/controllers/ping');
-const { auth } = require('../api/middleware/auth');
-const { visitUpdate } = require('../api/middleware/visit');
+// const { auth } = require('../api/middleware/auth');
 const { Router } = require('express'); 
 const router = Router();
 

@@ -6,18 +6,39 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix =
-            new Date().toLocaleDateString("th").replace(/\//g, "_" ) +"_"+ new Date().toLocaleTimeString("th").replace(/:/g, "-") 
-            + "_" + req.params.name;
+            new Date().toLocaleDateString("th").replace(/\//g, "_") +
+            "_" +
+            new Date().toLocaleTimeString("th").replace(/:/g, "-") +
+            "_" +
+            req.params.name;
         cb(null, uniqueSuffix + "_" + file.originalname);
     },
 });
 
-exports.upload = multer({ storage: storage }).single('file')
+const memoryStorage = multer.memoryStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./public/uploads");
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix =
+            new Date().toLocaleDateString("th").replace(/\//g, "_") +
+            "_" +
+            new Date().toLocaleTimeString("th").replace(/:/g, "-") +
+            "_" +
+            req.params.name;
+        cb(null, uniqueSuffix + "_" + file.originalname);
+    },
+});
+if (memoryStorage) {
+    exports.upload = multer({ storage: memoryStorage }).single("file");
+} else {
+    exports.upload = multer({ storage: storage }).single("file");
+}
 
 exports.progressUpload = (req, res, next) => {
     try {
         let progres = 0;
-        let file_size = req.headers["content-length"] ? parseInt(req.headers['content-length']) : 0;
+        let file_size = req.headers["content-length"] ? parseInt(req.headers["content-length"]) : 0;
 
         req.on("data", (chunk) => {
             progres += chunk.length;
@@ -29,7 +50,6 @@ exports.progressUpload = (req, res, next) => {
             console.log(`Upload Success ${(progres / 1024 / 1024).toFixed(3)} MB , ${req.upload}`);
         });
         next();
-        
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }

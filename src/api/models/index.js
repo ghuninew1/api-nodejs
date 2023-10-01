@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const path = require("path");
-const fs = require("fs");
-const basename = path.basename(__filename);
+const { readdirSync } = require("fs");
 
 // connect to the database
 mongoose.Promise = global.Promise;
@@ -9,18 +7,14 @@ const db = {};
 db.mongoose = mongoose;
 
 // name of the database
-const name = fs
-    .readdirSync(__dirname)
-    .filter((file) => file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js")
-    .map((file) => file.split(".")[0]);
+const name = readdirSync("./src/api/models")
+    .filter((file) => file.slice(-8) === "model.js" && file !== "index.js")
+    .map((f) => f.slice(0, -9));
 
 // import all models
-name.forEach((file) => {
-    db[file] = require("./" + file + ".model");
-});
-
-// Roles for users
-db.ROLES = ["user", "admin", "moderator"];
+name.forEach((n) => {
+    db[n] = require("./" + n + ".model");
+} );
 
 // export the database
 module.exports = db;

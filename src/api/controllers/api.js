@@ -11,11 +11,7 @@ exports.findAll = async (req, res) => {
             const timeseries = item.options.timeseries && item.options.timeseries;
             return (item = { name, type, timeseries });
         });
-        if (data.length === 0) {
-            res.status(404).json({ message: "Find Fail" });
-        } else {
-            res.status(200).json(data);
-        }
+        dbAll ? res.status(200).json(data) : res.status(404).json({ message: "Find Fail" });
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
@@ -34,9 +30,7 @@ exports.findOne = async (req, res) => {
                 .sort({ [sort]: order === "asc" ? 1 : -1 })
                 .exec()
                 .then((data) => {
-                    data
-                        ? res.status(200).json(data)
-                        : res.status(404).json({ message: "Find Fail" });
+                    res.status(200).json(data)
                 });
         } else {
             res.status(404).json({ message: "Find Fail" });
@@ -55,9 +49,7 @@ exports.findById = async (req, res) => {
                 .findById({ _id: id })
                 .exec()
                 .then((data) => {
-                    data
-                        ? res.status(200).json(data)
-                        : res.status(404).json({ message: "Find Fail" });
+                    res.status(200).json(data)
                 });
         } else {
             res.status(404).json({ message: "Find Fail" });
@@ -117,14 +109,10 @@ exports.updateByid = async (req, res) => {
                     if (err) {
                         res.status(500).json({ msg: "Server Error: " + err });
                     }
+                    res.status(200).json({ message: "Update Success", data: data });
                 });
-                fileUpdate
-                    ? res.status(200).json({ message: "Update Success", data: data })
-                    : res.status(404).json({ message: "Update Fail" });
             } else {
-                fileUpdate
-                    ? res.status(200).json({ message: "Update Success", data: data })
-                    : res.status(404).json({ message: "Update Fail" });
+                res.status(200).json({ message: "Update Success", data: data });
             }
         } else {
             res.status(404).json({ message: "Update Fail" });
@@ -137,8 +125,8 @@ exports.updateByid = async (req, res) => {
 exports.deleteByid = async (req, res) => {
     try {
         const name = req.params.name;
+        const id = req.params.id;
         if (name) {
-            const id = req.params.id;
             const fileRemove = await db[name].findOneAndDelete({ _id: id }).exec();
             if (fileRemove?.file) {
                 fs.unlinkSync(`./public/uploads/${fileRemove.file}`, (err) => {
@@ -173,61 +161,6 @@ exports.deleteAll = async (req, res) => {
             res.status(200).json({ message: "Delete Success", db: name });
         } else {
             res.status(404).json({ message: "Delete Fail" });
-        }
-    } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
-    }
-};
-
-exports.pingCheck = async (req, res) => {
-    try {
-        const ip = req.query.ip;
-        const ipss = ip.split(",");
-
-        if (ipss.length === 1) {
-            const ress = await ping.promise.probe(ip, {
-                timeout: 10,
-                extra: ["-i", "2"],
-            });
-            await res.status(200).json(ress);
-        } else {
-            let result = [];
-            for (let i = 0; i < ipss.length; i++) {
-                const ress = await ping.promise.probe(ipss[i], {
-                    timeout: 10,
-                    extra: ["-i", "2"],
-                });
-
-                result.push(ress);
-            }
-            await res.status(200).json(result);
-        }
-    } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
-    }
-};
-
-exports.ipPublic = async (req, res) => {
-    try {
-        const ip = req.query.ip;
-        if (ip) {
-            const ipinfo = `https://ipinfo.io/${ip}/json?token=f44742fe54a2b2`;
-            const Response = await fetch(ipinfo);
-            const data = await Response.json();
-            if (data.error) {
-                res.status(404).json({ message: "Not Found" });
-            } else {
-                res.status(200).json(data);
-            }
-        } else {
-            const url = "https://ipinfo.io/json?token=f44742fe54a2b2";
-            const Response = await fetch(url);
-            const data = await Response.json();
-            if (data.error) {
-                res.status(404).json({ message: "Not Found" });
-            } else {
-                res.status(200).json(data);
-            }
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });

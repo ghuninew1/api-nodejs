@@ -23,7 +23,7 @@ app.use(bodyParser.json({ limit: "150mb" }));
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ limit: "150mb", extended: true, parameterLimit: 50000 }));
 app.use(express.static(path.join(__dirname, "./public")));
-app.use(middleware);
+app.use("*", middleware);
 app.set("trust proxy", true);
 
 // routes

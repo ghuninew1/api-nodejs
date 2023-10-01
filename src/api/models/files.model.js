@@ -18,4 +18,4 @@ const filesSchema = new mongoose.Schema(
 
 filesSchema.index({ id: 1 }, { unique: true });
 
-module.exports = mongoose.model("files", filesSchema);
+module.exports = mongoose.model("files", filesSchema, "files");

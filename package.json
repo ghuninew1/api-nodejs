@@ -1,6 +1,6 @@
 {
     "name": "@ghuninew1/api-nodejs",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "description": "https://github.com/ghuninew1",
     "main": "server.js",
     "author": "GhuniNew",
@@ -26,8 +26,7 @@
         "multer": "1.4.5-lts.1",
         "nodemon": "^3.0.1",
         "pidusage": "^3.0.2",
-        "ping": "^0.4.4",
-        "uuid": "^9.0.1"
+        "ping": "^0.4.4"
     },
     "repository": {
         "type": "git",

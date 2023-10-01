@@ -22,4 +22,4 @@ const usersSchema = new mongoose.Schema(
     }
 ).index({ username: 1 }, { unique: true });
 
-module.exports = mongoose.model("Users", usersSchema);
+module.exports = mongoose.model("users", usersSchema, "users");

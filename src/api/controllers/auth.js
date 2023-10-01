@@ -41,7 +41,8 @@ exports.register = async (req, res) => {
         let payload = {
             user: user,
         };
-        user ? res.status(201).json(payload) : res.status(400).json({ msg: "User not found" });
+        return await res.status(201).json(payload);
+
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
@@ -89,7 +90,7 @@ exports.login = async (req, res) => {
                                 username: user.username,
                                 email: user.email,
                                 tokens: {
-                                    token: token,
+                                    token: token && token,
                                     expires: Date.now() + 86400000,
                                 },
                             });
@@ -101,8 +102,8 @@ exports.login = async (req, res) => {
                         username: user.username,
                         email: user.email,
                         tokens: {
-                            token: token.token,
-                            expires: token.expires,
+                            token: token.token && token.token,
+                            expires: token.expires && token.expires,
                         },
                     });
                 }
@@ -127,7 +128,7 @@ exports.login = async (req, res) => {
                             username: user.username,
                             email: user.email,
                             tokens: {
-                                token: token,
+                                token: token && token,
                                 expires: Date.now() + 86400000,
                             },
                         });
