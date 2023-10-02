@@ -11,7 +11,11 @@ exports.findAll = async (req, res) => {
             const timeseries = item.options.timeseries && item.options.timeseries;
             return (item = { name, type, timeseries });
         });
-        dbAll ? res.status(200).json(data) : res.status(404).json({ message: "Find Fail" });
+        if (Object.keys(data).length !== 0 && data.constructor === Array) {
+            res.status(200).json(data);
+        } else {
+            res.status(404).json({ message: "Find Fail" });
+        }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
     }
@@ -24,16 +28,18 @@ exports.findOne = async (req, res) => {
         const sort = req.query.sort;
         const order = req.query.order;
         if (name) {
-            await db[name]
-                .find({})
-                .limit(limit ? (limit > 1 ? limit : 0) : 20)
+            const data = await db[name]
+                .find()
                 .sort({ [sort]: order === "asc" ? 1 : -1 })
-                .exec()
-                .then((data) => {
-                    res.status(200).json(data)
-                });
+                .limit(limit ? (limit > 1 ? limit : 0) : 20)
+                .exec();
+            if (Object.keys(data).length !== 0 && data.constructor === Array) {
+                res.status(200).json(data);
+            } else {
+                res.status(404).json({ message: "Find Fail" });
+            }
         } else {
-            res.status(404).json({ message: "Find Fail" });
+            res.status(404).json({ message: "Enter name" });
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
@@ -43,16 +49,16 @@ exports.findOne = async (req, res) => {
 exports.findById = async (req, res) => {
     try {
         const name = req.params.name;
-        if (name) {
-            const id = req.params.id;
-            await db[name]
-                .findById({ _id: id })
-                .exec()
-                .then((data) => {
-                    res.status(200).json(data)
-                });
+        const id = req.params.id;
+        if (name && id) {
+            const data = await db[name].findOne({ _id: id }).exec();
+            if (Object.keys(data).length !== 0 && data.constructor === db[name]) {
+                res.status(200).json(data);
+            } else {
+                res.status(404).json({ message: "Find Fail" });
+            }
         } else {
-            res.status(404).json({ message: "Find Fail" });
+            res.status(404).json({ message: "Enter name and id" });
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
@@ -65,25 +71,21 @@ exports.createByName = async (req, res) => {
         if (name) {
             const data = req.body;
             if (req.file) {
-                data.file = req.file.filename;
-                data.file_size = req.file.size;
-                data.file_originalname = req.file.originalname;
-                data.file_path = req.file.path;
-                data.file_mimetype = req.file.mimetype;
+                data.file = req.file.filename && req.file.filename;
+                data.file_size = req.file.size && req.file.size;
+                data.file_originalname = req.file.originalname && req.file.originalname;
+                data.file_path = req.file.path && req.file.path;
+                data.file_mimetype = req.file.mimetype && req.file.mimetype;
             }
             const fileCreate = new db[name](data);
             await fileCreate.save();
-            if (req.file) {
-                res.status(201).json({
-                    message: "Create Success",
-                    upload: req.upload,
-                    data: data,
-                });
-            } else {
+            if (Object.keys(fileCreate).length !== 0 && fileCreate.constructor === db[name]) {
                 res.status(201).json({ message: "Create Success", data: data });
+            } else {
+                res.status(404).json({ message: "Create Fail" });
             }
         } else {
-            res.status(404).json({ message: "Not Create" });
+            res.status(404).json({ message: "Enter name" });
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
@@ -93,29 +95,32 @@ exports.createByName = async (req, res) => {
 exports.updateByid = async (req, res) => {
     try {
         const name = req.params.name;
-        if (name) {
+        const id = req.params.id;
+        if (name && id) {
             const data = req.body;
-            const id = req.params.id;
             if (req.file) {
-                data.file = req.file.filename;
-                data.file_size = req.file.size;
-                data.file_originalname = req.file.originalname;
-                data.file_path = req.file.path;
-                data.file_mimetype = req.file.mimetype;
+                data.file = req.file.filename && req.file.filename;
+                data.file_size = req.file.size && req.file.size;
+                data.file_originalname = req.file.originalname && req.file.originalname;
+                data.file_path = req.file.path && req.file.path;
+                data.file_mimetype = req.file.mimetype && req.file.mimetype;
             }
             const fileUpdate = await db[name].findOneAndUpdate({ _id: id }, data).exec();
             if (fileUpdate?.file) {
                 fs.unlinkSync(`./public/uploads/${fileUpdate.file}`, (err) => {
                     if (err) {
-                        res.status(500).json({ msg: "Server Error: " + err });
+                        res.status(500).json({ msg: "File Error: " + err });
                     }
                     res.status(200).json({ message: "Update Success", data: data });
                 });
-            } else {
+            }
+            if (Object.keys(fileUpdate).length !== 0 && fileUpdate.constructor === db[name]) {
                 res.status(200).json({ message: "Update Success", data: data });
+            } else {
+                res.status(404).json({ message: "Update Fail" });
             }
         } else {
-            res.status(404).json({ message: "Update Fail" });
+            res.status(404).json({ message: "Enter name and id" });
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
@@ -126,24 +131,23 @@ exports.deleteByid = async (req, res) => {
     try {
         const name = req.params.name;
         const id = req.params.id;
-        if (name) {
+        if (name && id) {
             const fileRemove = await db[name].findOneAndDelete({ _id: id }).exec();
             if (fileRemove?.file) {
                 fs.unlinkSync(`./public/uploads/${fileRemove.file}`, (err) => {
                     if (err) {
-                        res.status(500).json({ msg: "Server Error: " + err });
+                        res.status(500).json({ msg: "File Error: " + err });
                     }
                 });
-                fileRemove
-                    ? res.status(200).json({ message: "Delete Success", id: id })
-                    : res.status(404).json({ message: "Delete Fail" });
+                res.status(200).json({ message: "Delete Success", id: id });
+            }
+            if (Object.keys(fileRemove).length !== 0 && fileRemove.constructor === db[name]) {
+                res.status(200).json({ message: "Delete Success", id: id });
             } else {
-                fileRemove
-                    ? res.status(200).json({ message: "Delete Success", id: id })
-                    : res.status(404).json({ message: "Delete Fail" });
+                res.status(404).json({ message: "Delete Fail" });
             }
         } else {
-            res.status(404).json({ message: "Delete Fail" });
+            res.status(404).json({ message: "Enter name and id" });
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
@@ -154,13 +158,14 @@ exports.deleteAll = async (req, res) => {
     try {
         const name = req.params.name;
         if (name) {
-            const models = async (name) => {
-                await db.db.collection(name).drop();
-            };
-            await models(name);
-            res.status(200).json({ message: "Delete Success", db: name });
+            const modelDelete = await db[name].deleteMany({}).exec();
+            if (modelDelete && modelDelete.deletedCount > 0) {
+                res.status(200).json({ message: "Delete Success" });
+            } else {
+                res.status(404).json({ message: "Delete Fail" });
+            }
         } else {
-            res.status(404).json({ message: "Delete Fail" });
+            res.status(404).json({ message: "Enter name" });
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });

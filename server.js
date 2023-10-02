@@ -63,7 +63,4 @@ server.listen(config.port, () => {
 
 // socket.io
 app.io = socketIoInit(server);
-app.io.engine.generateId = (req) => {
-    return req._query["nodeId"];
-};
 exports.app = app;

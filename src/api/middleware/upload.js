@@ -15,25 +15,19 @@ const storage = multer.diskStorage({
     },
 });
 
-const memoryStorage = multer.memoryStorage({
-    destination: function (req, file, cb) {
-        cb(null, "./public/uploads");
+exports.upload = multer({
+    storage: storage,
+    limits: { fileSize: 1024 * 1024 * 10 },
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+            cb(null, true);
+        } else {
+            cb("Please upload only image file.", false);
+        }
     },
-    filename: function (req, file, cb) {
-        const uniqueSuffix =
-            new Date().toLocaleDateString("th").replace(/\//g, "_") +
-            "_" +
-            new Date().toLocaleTimeString("th").replace(/:/g, "-") +
-            "_" +
-            req.params.name;
-        cb(null, uniqueSuffix + "_" + file.originalname);
-    },
-});
-if (memoryStorage) {
-    exports.upload = multer({ storage: memoryStorage }).single("file");
-} else {
-    exports.upload = multer({ storage: storage }).single("file");
-}
+}).single("file");       
+
+
 
 exports.progressUpload = (req, res, next) => {
     try {
