@@ -25,4 +25,4 @@ const pingSchema = new mongoose.Schema(
 
 pingSchema.index({ ip: 1, createdAt: 1 });
 
-module.exports = mongoose.model("ping", pingSchema, "ping");
+module.exports = mongoose.model("ping", pingSchema);

@@ -11,7 +11,7 @@ exports.findAll = async (req, res) => {
             const timeseries = item.options.timeseries && item.options.timeseries;
             return (item = { name, type, timeseries });
         });
-        if (Object.keys(data).length !== 0 && data.constructor === Array) {
+        if (Object.keys(data).length !== 0) {
             res.status(200).json(data);
         } else {
             res.status(404).json({ message: "Find Fail" });
@@ -33,7 +33,7 @@ exports.findOne = async (req, res) => {
                 .sort({ [sort]: order === "asc" ? 1 : -1 })
                 .limit(limit ? (limit > 1 ? limit : 0) : 20)
                 .exec();
-            if (Object.keys(data).length !== 0 && data.constructor === Array) {
+            if (Object.keys(data).length !== 0) {
                 res.status(200).json(data);
             } else {
                 res.status(404).json({ message: "Find Fail" });
@@ -52,7 +52,7 @@ exports.findById = async (req, res) => {
         const id = req.params.id;
         if (name && id) {
             const data = await db[name].findOne({ _id: id }).exec();
-            if (Object.keys(data).length !== 0 && data.constructor === db[name]) {
+            if (Object.keys(data).length !== 0) {
                 res.status(200).json(data);
             } else {
                 res.status(404).json({ message: "Find Fail" });
@@ -78,12 +78,12 @@ exports.createByName = async (req, res) => {
                 data.file_mimetype = req.file.mimetype && req.file.mimetype;
             }
             const fileCreate = new db[name](data);
-            await fileCreate.save();
-            if (Object.keys(fileCreate).length !== 0 && fileCreate.constructor === db[name]) {
+            await fileCreate.save((err, data) => {
+                if (err) {
+                    res.status(500).json({ msg: "Server Error: " + err });
+                }
                 res.status(201).json({ message: "Create Success", data: data });
-            } else {
-                res.status(404).json({ message: "Create Fail" });
-            }
+            });
         } else {
             res.status(404).json({ message: "Enter name" });
         }
@@ -114,7 +114,7 @@ exports.updateByid = async (req, res) => {
                     res.status(200).json({ message: "Update Success", data: data });
                 });
             }
-            if (Object.keys(fileUpdate).length !== 0 && fileUpdate.constructor === db[name]) {
+            if (Object.keys(fileUpdate).length !== 0) {
                 res.status(200).json({ message: "Update Success", data: data });
             } else {
                 res.status(404).json({ message: "Update Fail" });
@@ -141,7 +141,7 @@ exports.deleteByid = async (req, res) => {
                 });
                 res.status(200).json({ message: "Delete Success", id: id });
             }
-            if (Object.keys(fileRemove).length !== 0 && fileRemove.constructor === db[name]) {
+            if (Object.keys(fileRemove).length !== 0) {
                 res.status(200).json({ message: "Delete Success", id: id });
             } else {
                 res.status(404).json({ message: "Delete Fail" });

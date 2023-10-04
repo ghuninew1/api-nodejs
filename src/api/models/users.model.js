@@ -20,6 +20,6 @@ const usersSchema = new mongoose.Schema(
         timestamps: true,
         versionKey: false,
     }
-).index({ username: 1 }, { unique: true });
+);
 
-module.exports = mongoose.model("users", usersSchema, "users");
+module.exports = mongoose.model("users", usersSchema);

@@ -15,19 +15,7 @@ const storage = multer.diskStorage({
     },
 });
 
-exports.upload = multer({
-    storage: storage,
-    limits: { fileSize: 1024 * 1024 * 10 },
-    fileFilter: function (req, file, cb) {
-        if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-            cb(null, true);
-        } else {
-            cb("Please upload only image file.", false);
-        }
-    },
-}).single("file");       
-
-
+exports.upload = multer({storage: storage,limits: { fileSize: 1024 * 1024 * 10000 }}).single("file");
 
 exports.progressUpload = (req, res, next) => {
     try {

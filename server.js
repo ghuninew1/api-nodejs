@@ -11,7 +11,6 @@ const { visitUpdate } = require("./src/api/middleware/visit");
 const { middleware } = require("./src/api/middleware/middleware");
 
 const app = express();
-connect();
 
 // view engine setup
 app.set("views", path.join(__dirname, "./public"));
@@ -60,6 +59,7 @@ server.listen(config.port, () => {
     const address = addr.address === "::" ? "localhost" : addr.address;
     console.log(`app running on ` + "http://" + address + ":" + addr.port);
 });
+connect();
 
 // socket.io
 app.io = socketIoInit(server);
