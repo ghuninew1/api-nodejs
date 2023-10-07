@@ -14,12 +14,12 @@ exports.register = async (req, res) => {
             username,
             password,
             email,
-            roles:[
+            roles: [
                 {
                     role: "user",
                     id: 100,
-                }
-            ]
+                },
+            ],
         });
         user.password = await bcrypt.hash(password, salt);
         await user.save();
@@ -122,5 +122,22 @@ exports.currentUser = async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
+    }
+};
+
+exports.currentUserWs = async (socket) => {
+    try {
+        socket.on("currentuser", async (users) => {
+            
+            const userdb = users.user
+            const user = await db.users.findOne({ username: userdb }).select("-password").exec();
+            if (!user) {
+                return socket.emit("currentusered", { msg: "User not found" });
+            } else {
+                socket.emit("currentusered", user);
+            }
+        });
+    } catch (err) {
+        socket.emit("currentusered", { msg: "Server Error: " + err });
     }
 };

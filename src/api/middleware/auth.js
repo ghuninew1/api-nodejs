@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-const db = require("../models");
-const bcrypt = require("bcryptjs");
+// const db = require("../models");
 const config = require("../config/auth.config");
 
 exports.auth = async (req, res, next) => {
@@ -18,5 +17,25 @@ exports.auth = async (req, res, next) => {
         });
     } catch (err) {
         res.status(500).json({ msg: "Server Error: " + err });
+    }
+};
+
+exports.authWs = async (socket, next) => {
+    try {
+        socket.on("authenticate", async ({token}) => {
+            // const token = req?.authtoken;
+            if (!token) {
+                return socket.emit("authenticated", { msg: "No token, authorization denied" });
+            }
+            jwt.verify(token, config.secret, (err, decoded) => {
+                if (err) {
+                    return socket.emit("authenticated", { msg: "Token is not valid" });
+                }
+                socket.emit("authenticated", decoded.user );
+                // next();
+            });
+        });
+    } catch (err) {
+        socket.emit("authenticated", { msg: "Server Error: " + err });
     }
 };

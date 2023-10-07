@@ -3,13 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
-const { readdirSync } = require("fs");
+const fs = require("fs");
 
 const { config, connect } = require("./src/api/config/db.config");
 const socketIoInit = require("./src/services/socket");
 const { visitUpdate } = require("./src/api/middleware/visit");
 const { middleware } = require("./src/api/middleware/middleware");
 
+connect();
 const app = express();
 
 // view engine setup
@@ -38,7 +39,7 @@ app.get("/", visitUpdate, indexData);
 
 app.get("/ws", visitUpdate, wsData);
 
-readdirSync("./src/routes")
+fs.readdirSync("./src/routes")
     .filter((f) => f.slice(-8) === "route.js")
     .map((r) => app.use("/", require("./src/routes/" + r)));
 
@@ -54,13 +55,13 @@ app.use((err, req, res) => {
 
 // http server
 const server = http.createServer(app);
+// const server = https.createServer({ key, cert }, app);
+
 server.listen(config.port, () => {
     const addr = server.address();
     const address = addr.address === "::" ? "localhost" : addr.address;
     console.log(`app running on ` + "http://" + address + ":" + addr.port);
 });
-connect();
 
 // socket.io
-app.io = socketIoInit(server);
-exports.app = app;
+socketIoInit(server);
