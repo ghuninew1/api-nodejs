@@ -4,19 +4,19 @@ const visits = db.visit;
 exports.visitUpdate = async (req, res, next) => {
     try {
         const url = req.url;
-        const ips = req.ip || req.connection.remoteAddress;
+        const ips = req.ip;
         const ip = ips.split(":").pop();
         const visit = await visits.findOne({ url: url });
         
-        if (visit && ip === visit?.ip) {
+        if (visit && ip === visit.ip) {
             await visits.updateOne(
                 { url: url },
                 { $inc: { counter: 1 }, $set: { ip: ip }, new: true }
             );
-            next();
+            return next();
         } else {
             const visitip = await visits.findOne({ ip: ip });
-            if (ip === visitip?.ip && visit) {
+            if (ip === visitip.ip && visit) {
                 await visits.updateOne(
                     { ip: ip },
                     { $inc: { counter: 1 }, $set: { url: url }, new: true }
@@ -29,7 +29,7 @@ exports.visitUpdate = async (req, res, next) => {
                     ip: ip,
                 });
                 visitTs.save();
-                next();
+                return next();
             }
         }
     } catch (err) {

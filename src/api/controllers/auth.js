@@ -132,12 +132,13 @@ exports.currentUserWs = async (socket) => {
             const userdb = users.user
             const user = await db.users.findOne({ username: userdb }).select("-password").exec();
             if (!user) {
-                return socket.emit("currentusered", { msg: "User not found" });
+                return console.log("User not found");
             } else {
+
                 socket.emit("currentusered", user);
             }
         });
     } catch (err) {
-        socket.emit("currentusered", { msg: "Server Error: " + err });
+        console.log("error in currentuserws", err);
     }
 };

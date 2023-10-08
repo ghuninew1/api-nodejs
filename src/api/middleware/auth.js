@@ -20,22 +20,22 @@ exports.auth = async (req, res, next) => {
     }
 };
 
-exports.authWs = async (socket, next) => {
+exports.authWs = async (socket) => {
     try {
-        socket.on("authenticate", async ({token}) => {
+        socket.on("authenticate", ({token}) => {
             // const token = req?.authtoken;
             if (!token) {
-                return socket.emit("authenticated", { msg: "No token, authorization denied" });
+                return console.log("No token, authorization denied");
             }
             jwt.verify(token, config.secret, (err, decoded) => {
                 if (err) {
-                    return socket.emit("authenticated", { msg: "Token is not valid" });
+                    return console.log("Token is not valid");
                 }
+                socket.request.user = decoded.user;
                 socket.emit("authenticated", decoded.user );
-                // next();
             });
         });
     } catch (err) {
-        socket.emit("authenticated", { msg: "Server Error: " + err });
+        console.log("Server Error: " + err);
     }
 };

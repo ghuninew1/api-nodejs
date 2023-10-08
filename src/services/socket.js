@@ -13,30 +13,35 @@ module.exports = (server) => {
             });
 
             io.on("connection", async (socket) => {
-                const transport = socket.conn.transport.name;
                 socket.conn.on("upgrade", () => {
-                    const upgradedTransport = socket.conn.transport.name;
-                    if (transport !== upgradedTransport) {
-                        console.log(
-                            `Socket ${socket.id} upgraded from ${transport} to ${upgradedTransport}`
-                        );
+                    if (socket.conn.transport.name === "webtransport") {
+                        console.log("webtransport");
                     }
                 });
-                console.log("Socket connected: " + socket.id);
-                socket.on("disconnect", (reason) => {
-                    console.log(`disconnected due to ${reason}` + " : " + socket.id);
+
+                socket.conn.transport.on("upgrade", () => {
+                    if (socket.conn.transport.name === "webtransport") {
+                        console.log("transport webtransport");
+                    }
+                });
+
+                socket.conn.transport.on("close", () => {
+                    console.log("transport close" + " " + socket.id);
+                });
+
+                console.log("socket connected", socket.id + " " + socket.conn.transport.name);
+
+                socket.on("disconnect", () => {
+                    console.log("socket disconnected", socket.conn.remoteAddress);
+                });
+
+                socket.on("error", (error) => {
+                    console.log("socket error", error);
                 });
 
                 socketRoute(socket);
-
             });
-
-            io.on("error", (err) => {
-                console.log("socket error", err);
-            });
-
             return io;
-
         } else {
             return io;
         }

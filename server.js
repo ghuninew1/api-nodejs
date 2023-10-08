@@ -64,4 +64,6 @@ server.listen(config.port, () => {
 });
 
 // socket.io
-socketIoInit(server);
+app.io = socketIoInit(server);
+
+module.exports = app;
