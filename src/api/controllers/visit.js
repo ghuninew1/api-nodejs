@@ -12,7 +12,7 @@ exports.visitPageView = async (req, res) => {
                 const visit = await Visits.findOne({ url: url });
                 const visiturl = await Visits.find({ url: url });
                 if (visit) {
-                    res.status(200).json({
+                    return res.status(200).json({
                         url: url ? url : "",
                         counter: visiturl.length ? visiturl.length : 0,
                         ip: visit.ip ? visit.ip : [],
@@ -20,12 +20,12 @@ exports.visitPageView = async (req, res) => {
                         visitUrl: visiturl ? visiturl : [],
                     });
                 } else {
-                    res.status(404).json({ msg: "Not Found" });
+                    return res.status(404).json( "Not Found" );
                 }
             } else if (ip) {
                 const visit = await Visits.findOne({ ip: ip });
                 const visitip = await Visits.find({ ip: ip });
-                res.status(200).json({
+                return res.status(200).json({
                     url: visit.url ? visit.url : "",
                     counter: visitip.length,
                     ip: visit.ip ? visit.ip : [],
@@ -33,7 +33,7 @@ exports.visitPageView = async (req, res) => {
                     visitIp: visitip ? visitip : [],
                 });
             } else {
-                res.status(404).json({ msg: "Not Found" });
+                return res.status(404).json( "Not Found" );
             }
         } else {
             const visitAll = await Visits.find();
@@ -56,7 +56,7 @@ exports.visitPageView = async (req, res) => {
                 }
                 return acc;
             }, {});
-            res.status(200).json({
+            return res.status(200).json({
                 counterAll: counterAll ? counterAll : 0,
                 data: show === "all" && visitAll,
                 visitUrl: visitUrl ? visitUrl : [],
@@ -66,7 +66,7 @@ exports.visitPageView = async (req, res) => {
             });
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        return res.status(500).json( "Server Error: " + err + " " + err.message);
     }
 };
 
@@ -85,7 +85,7 @@ exports.visitPageCreate = async (req, res) => {
                     { url: url },
                     { $inc: { counter: 1 }, $set: { ip: ip.address }, new: true }
                 );
-                res.status(200).json({ msg: "Update Success" });
+                return res.status(200).json( "Update Success" );
             } else {
                 const visitIp = await Visits.findOne({ ip: ip.address });
                 if (ip.address === visitIp?.ip && visit) {
@@ -93,15 +93,15 @@ exports.visitPageCreate = async (req, res) => {
                         { ip: ip.address },
                         { $inc: { counter: 1 }, $set: { url: url }, new: true }
                     );
-                    res.status(200).json({ msg: "Update Success" });
+                    return res.status(200).json( "Update Success" );
                 } else {
                     const visitTs = new Visits({
                         url: url,
                         counter: 1,
                         ip: ip.address,
                     });
-                    visitTs.save();
-                    res.status(201).json({ msg: "Create Success" });
+                    await visitTs.save();
+                    return res.status(201).json( "Create Success" );
                 }
             }
         } else if (!url && ips) {
@@ -112,20 +112,20 @@ exports.visitPageCreate = async (req, res) => {
                     { ip: ip },
                     { $inc: { counter: 1 }, $set: { url: url }, new: true }
                 );
-                res.status(200).json({ msg: "Update Success" });
+                return res.status(200).json( "Update Success" );
             } else {
                 const visitTs = new Visits({
                     url: url,
                     counter: 1,
                     ip: ip,
                 });
-                visitTs.save();
-                res.status(201).json({ msg: "Create Success" });
+                await visitTs.save();
+                return res.status(201).json( "Create Success" );
             }
         } else {
-            res.status(404).json({ msg: "Not Found" });
+            return res.status(404).json( "Not Found" );
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json( "Server Error: " + err );
     }
 };

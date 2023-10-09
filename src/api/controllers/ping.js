@@ -12,7 +12,7 @@ exports.pingCheck = async (req, res) => {
                 timeout: 10,
                 extra: ["-i", "2"],
             });
-            await res.status(200).json(ress);
+            return res.status(200).json(ress);
         } else {
             let result = [];
             for (let i = 0; i < ipss.length; i++) {
@@ -23,10 +23,10 @@ exports.pingCheck = async (req, res) => {
 
                 result.push(ress);
             }
-            await res.status(200).json(result);
+            return res.status(200).json(result);
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json("Server Error: " + err + " " + err.message);
     }
 };
 
@@ -38,22 +38,22 @@ exports.ipPublic = async (req, res) => {
             const Response = await fetch(ipinfo);
             const data = await Response.json();
             if (data.error) {
-                res.status(404).json({ message: "Not Found" });
+                return res.status(404).json("Not Found");
             } else {
-                res.status(200).json(data);
+                return res.status(200).json(data);
             }
         } else {
             const url = "https://ipinfo.io/json?token=f44742fe54a2b2";
             const Response = await fetch(url);
             const data = await Response.json();
             if (data.error) {
-                res.status(404).json({ message: "Not Found" });
+                return res.status(404).json("Not Found");
             } else {
-                res.status(200).json(data);
+                return res.status(200).json(data);
             }
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json("Server Error: " + err + " " + err.message);
     }
 };
 
@@ -63,13 +63,13 @@ exports.insertTimeSeries = async (req, res) => {
         if (data) {
             const pingCreate = await Ping.insertMany(data);
             pingCreate
-                ? res.status(201).json({ message: "Create Success", data: data })
-                : res.status(404).json({ message: "Not Found" });
+                ? res.status(201).json("Create Success", data)
+                : res.status(404).json("Not Found");
         } else {
-            res.status(404).json({ message: "Not Found" });
+            return res.status(404).json("Not Found");
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json("Server Error: " + err + " " + err.message);
     }
 };
 
@@ -143,15 +143,15 @@ exports.getIpTimeSeries = async (req, res) => {
         });
 
         if (ip && host) {
-            res.status(200).json(resultHostIp);
+            return res.status(200).json(resultHostIp);
         } else if (ip) {
-            res.status(200).json(resultIp);
+            return res.status(200).json(resultIp);
         } else if (host) {
-            res.status(200).json(resultHost);
+            return res.status(200).json(resultHost);
         } else {
-            res.status(200).json(resultAll);
+            return res.status(200).json(resultAll);
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json("Server Error: " + err);
     }
 };

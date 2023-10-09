@@ -33,6 +33,6 @@ exports.visitUpdate = async (req, res, next) => {
             }
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json( "Server Error: " + err );
     }
 };

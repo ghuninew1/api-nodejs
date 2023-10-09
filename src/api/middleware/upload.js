@@ -33,6 +33,6 @@ exports.progressUpload = (req, res, next) => {
         });
         next();
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json( "Server Error: " + err + " " + err.message);
     }
 };

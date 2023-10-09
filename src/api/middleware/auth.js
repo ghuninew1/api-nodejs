@@ -6,17 +6,17 @@ exports.auth = async (req, res, next) => {
     try {
         const token = req?.headers["authtoken"];
         if (!token) {
-            return res.status(401).json({ msg: "No token, authorization denied" });
+            return res.status(401).json( "No token, authorization denied" );
         }
         jwt.verify(token, config.secret, (err, decoded) => {
             if (err) {
-                return res.status(403).json({ msg: "Token is not valid" });
+                return res.status(403).json( "Token is not valid" );
             }
             req.user = decoded.user;
             next();
         });
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json( "Server Error: " + err + " " + err.message);
     }
 };
 
@@ -31,7 +31,6 @@ exports.authWs = async (socket) => {
                 if (err) {
                     return console.log("Token is not valid");
                 }
-                socket.request.user = decoded.user;
                 socket.emit("authenticated", decoded.user );
             });
         });

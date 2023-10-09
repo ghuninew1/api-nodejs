@@ -28,7 +28,7 @@ app.set("trust proxy", true);
 
 // routes
 const indexData = async (req, res) => {
-    res.status(200).json({ message: "API GhuniNew" });
+    res.status(200).json( "API GhuniNew" );
 };
 const wsData = async (req, res) => {
     res.status(200).render("ws.html");
@@ -45,12 +45,12 @@ fs.readdirSync("./src/routes")
 
 // catch 404 and forward to error handler
 app.use((req, res) => {
-    res.status(404).json({ url: req.originalUrl + " not found @GhuniNew" });
+    res.status(404).json( req.originalUrl + " not found @GhuniNew" );
 });
 
 // error handler
 app.use((err, req, res) => {
-    res.status(500).json({ message: "Server Error @GhuniNew", err });
+    res.status(500).json( "Server Error @GhuniNew", err );
 });
 
 // http server

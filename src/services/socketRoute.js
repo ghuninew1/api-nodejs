@@ -1,11 +1,9 @@
 const pingMetrics = require("./socket.io/pingMetrics");
 const gatherOsMetrics = require("./socket.io/osMetrics");
-const { authWs } = require("../api/middleware/auth");
 const { currentUserWs } = require("../api/controllers/auth");
 
 exports.socketRoute = (socket) => {
     currentUserWs(socket);
-    authWs(socket);
     
     socket.on("status", (nodeData) => {
         const span = {};

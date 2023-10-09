@@ -5,9 +5,11 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
     try {
         const { username, password, email } = req.body;
+        if (!username || !password || !email || !username.trim() || !password.trim() || !email.trim())
+            return res.status(400).json( "Please enter all fields" );
         let user = await db.users.findOne({ username });
         if (user) {
-            return res.status(400).json({ msg: "User already exists: " + user.username });
+            return res.status(400).json( "User already exists: " + user.username );
         }
         const salt = await bcrypt.genSalt(10);
         user = new db.users({
@@ -27,7 +29,7 @@ exports.register = async (req, res) => {
         delete user.password;
         return res.status(201).json(user);
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json( "Server Error: " + err );
     }
 };
 
@@ -39,7 +41,7 @@ exports.login = async (req, res) => {
             const isMatch = bcrypt.compare(password, user.password);
 
             if (!isMatch) {
-                return res.status(404).json({ msg: "Invalid Credentials Password" });
+                return res.status(404).json( "Invalid Credentials Password" );
             }
             let payload = {
                 user: {
@@ -101,10 +103,10 @@ exports.login = async (req, res) => {
                 );
             }
         } else {
-            return res.status(404).json({ msg: "Invalid Credentials User not found" });
+            return res.status(404).json( "Invalid Credentials User not found" );
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json("Server Error: " + err );
     }
 };
 
@@ -116,12 +118,12 @@ exports.currentUser = async (req, res) => {
             .exec();
         // console.log(req.user);
         if (!user) {
-            return res.status(404).json({ msg: "User not found" });
+            return res.status(404).json( "User not found" );
         } else {
-            res.status(200).json(user);
+            return res.status(200).json(user);
         }
     } catch (err) {
-        res.status(500).json({ msg: "Server Error: " + err });
+        res.status(500).json( "Server Error: " + err );
     }
 };
 
@@ -132,9 +134,8 @@ exports.currentUserWs = async (socket) => {
             const userdb = users.user
             const user = await db.users.findOne({ username: userdb }).select("-password").exec();
             if (!user) {
-                return console.log("User not found");
+                console.log("User not found");
             } else {
-
                 socket.emit("currentusered", user);
             }
         });
