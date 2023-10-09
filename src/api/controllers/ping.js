@@ -5,7 +5,7 @@ const Ping = db.ping;
 exports.pingCheck = async (req, res) => {
     try {
         const ip = req.query.ip;
-        const ipss = ip.split(",");
+        const ipss = ip?.split(",");
 
         if (ipss.length === 1) {
             const ress = await ping.promise.probe(ip, {
@@ -15,7 +15,7 @@ exports.pingCheck = async (req, res) => {
             return res.status(200).json(ress);
         } else {
             let result = [];
-            for (let i = 0; i < ipss.length; i++) {
+            for (let i = 0; i < ipss?.length; i++) {
                 const ress = await ping.promise.probe(ipss[i], {
                     timeout: 10,
                     extra: ["-i", "2"],

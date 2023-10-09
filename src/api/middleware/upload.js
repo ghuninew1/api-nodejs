@@ -25,11 +25,11 @@ exports.progressUpload = (req, res, next) => {
         req.on("data", (chunk) => {
             progres += chunk.length;
             const persent = Math.floor((progres / file_size) * 100).toFixed(2);
-            req.upload = `${persent}%`;
+            req?.upload = `${persent}%`;
             console.log(`Upload Progress ${persent}%`);
         });
         req.on("end", () => {
-            console.log(`Upload Success ${(progres / 1024 / 1024).toFixed(3)} MB , ${req.upload}`);
+            console.log(`Upload Success ${(progres / 1024 / 1024).toFixed(3)} MB , ${req?.upload}`);
         });
         next();
     } catch (err) {

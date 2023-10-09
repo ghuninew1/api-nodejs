@@ -12,7 +12,7 @@ exports.auth = async (req, res, next) => {
             if (err) {
                 return res.status(403).json( "Token is not valid" );
             }
-            req.user = decoded.user;
+            req.user = decoded?.user;
             next();
         });
     } catch (err) {
