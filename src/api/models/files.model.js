@@ -18,4 +18,4 @@ const filesSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model("files", filesSchema);
+module.exports = mongoose.model("files", filesSchema, "files");

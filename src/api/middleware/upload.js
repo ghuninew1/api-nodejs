@@ -15,7 +15,26 @@ const storage = multer.diskStorage({
     },
 });
 
-exports.upload = multer({storage: storage,limits: { fileSize: 1024 * 1024 * 10000 }}).single("file");
+// exports.upload = multer({storage: storage,limits: { fileSize: 1024 * 1024 * 10000 }}).single("file");
+exports.upload = (req, res, next) => {
+    try {
+        const upload = multer({
+            storage: storage,
+            limits: { fileSize: 1024 * 1024 * 10000 },
+        }).single("file");
+        upload(req, res, function (err) {
+            if (err instanceof multer.MulterError) {
+                res.status(500).json( "Server Error: " + err + " " + err.message);
+            } else if (err) {
+                res.status(500).json( "Server Error: " + err + " " + err.message);
+            }
+            next();
+        });
+
+    } catch (err) {
+        res.status(500).json( "Server Error: " + err + " " + err.message);
+    }
+}
 
 exports.progressUpload = (req, res, next) => {
     try {

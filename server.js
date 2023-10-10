@@ -19,8 +19,8 @@ const sessionMiddleware = session({
     resave: true,
     saveUninitialized: true,
 });
-
 app.use(sessionMiddleware);
+
 // view engine setup
 app.set("views", path.join(__dirname, "./public"));
 app.engine("html", require("ejs").renderFile);
@@ -36,7 +36,11 @@ app.set("trust proxy", true);
 
 // routes
 const indexData = async (req, res) => {
-    res.status(200).json("API GhuniNew");
+    res.status(200).json({
+        status: 200,
+        message: "Welcome to GhuniNew",
+        version: "1.1.1",
+    });
 };
 const wsData = async (req, res) => {
     res.status(200).render("ws.html");
@@ -53,17 +57,16 @@ fs.readdirSync("./src/routes")
 
 // catch 404 and forward to error handler
 app.use((req, res) => {
-    res.status(404).json(req.originalUrl + " not found @GhuniNew");
+    res.status(404).json({ status: 404, message: "Not Found" });
 });
 
 // error handler
 app.use((err, req, res) => {
-    res.status(500).json("Server Error @GhuniNew", err);
+    res.status(500).json({ status: 500, message: "Server Error", error: err.message });
 });
 
 // http server
 const server = http.createServer(app);
-// const server = https.createServer({ key, cert }, app);
 
 server.listen(config.port, () => {
     const addr = server.address();
