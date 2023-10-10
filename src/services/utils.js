@@ -1,32 +1,30 @@
-
-
-export const ToLocalTime = (time) => {
+exports.ToLocalTime = (time) => {
     const date = new Date(time);
     return date.toLocaleString("th-TH");
 };
 
-export const IsData = (data) => {
+exports.IsData = (data) => {
     if (data !== null && data !== undefined && data !== "") return data;
 };
 
-export const IsDataArray = (data) => {
+exports.IsDataArray = (data) => {
     if (data !== null && data !== undefined && data.length > 0) return data;
 };
 
-export const IsDataObject = (data) => {
+exports.IsDataObject = (data) => {
     if (data !== null && data !== undefined && Object.keys(data).length > 0) return data;
 };
 
-export const IsDataObjectArray = (data) => {
+exports.IsDataObjectArray = (data) => {
     if (data !== null && data !== undefined && data.length > 0 && Object.keys(data[0]).length > 0)
         return data;
 };
 
-export const IsHidden = (data) => {
+exports.IsHidden = (data) => {
     if (data === null || data === undefined || data === "") return data ? true : false;
 };
 
-export const Image = ({ src, alt }) => {
+exports.Image = ({ src, alt }) => {
 
     return (
         <img

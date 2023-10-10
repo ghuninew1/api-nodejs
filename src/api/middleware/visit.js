@@ -13,7 +13,7 @@ exports.visitUpdate = async (req, res, next) => {
                 { url: url },
                 { $inc: { counter: 1 }, $set: { ip: ip }, new: true }
             );
-            return next();
+            next();
         } else {
             const visitip = await visits?.findOne({ ip: ip });
             if (ip === visitip?.ip && visit) {
@@ -28,8 +28,8 @@ exports.visitUpdate = async (req, res, next) => {
                     counter: 1,
                     ip: ip,
                 });
-                visitTs.save();
-                return next();
+                await visitTs.save();
+                next();
             }
         }
     } catch (err) {

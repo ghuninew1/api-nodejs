@@ -7,7 +7,7 @@ exports.socketRoute = (socket) => {
     currentUserWs(socket);
     
     socket.on("status", (nodeData,status) => {
-        console.log("status",status);
+        // console.log("status",status);
         const span = {};
         span.responses = [];
         span.retention = 60;

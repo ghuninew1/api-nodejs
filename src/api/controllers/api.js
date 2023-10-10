@@ -98,7 +98,7 @@ exports.updateByid = async (req, res) => {
                     if (err) {
                         return res.status(500).json( "File Error: " + err );
                     }
-                    return res.status(200).json( "Update Success",  data );
+                    return res.status(200).json(data);
                 });
             }
             return res.status(200).json(data);

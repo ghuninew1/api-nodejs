@@ -116,10 +116,10 @@ exports.currentUser = async (req, res) => {
             .findOne({ username: req.user.username })
             .select("-password")
             .exec();
-        // console.log(req.user);
-        if (user) {
-            res.status(200).json(user);
+        if (!user) {
+            res.status(404).json( "User not found" );
         }
+        res.status(200).json(user);
     } catch (err) {
         res.status(500).json( "Server Error: " + err );
     }
@@ -131,6 +131,7 @@ exports.currentUserWs = async (socket) => {
             const userdb = users.user
             const user = await db.users.findOne({ username: userdb }).select("-password").exec();
             if (!user) {
+                socket.emit("currentusered", "User not found");
                 console.log("User not found");
             }
             socket.emit("currentusered", user);
