@@ -4,6 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
+const session = require("express-session");
 
 const { config, connect } = require("./src/api/config/db.config");
 const socketIoInit = require("./src/services/socket");
@@ -13,6 +14,13 @@ const { middleware } = require("./src/api/middleware/middleware");
 connect();
 const app = express();
 
+const sessionMiddleware = session({
+    secret: "ghuninew",
+    resave: true,
+    saveUninitialized: true,
+});
+
+app.use(sessionMiddleware);
 // view engine setup
 app.set("views", path.join(__dirname, "./public"));
 app.engine("html", require("ejs").renderFile);
@@ -28,7 +36,7 @@ app.set("trust proxy", true);
 
 // routes
 const indexData = async (req, res) => {
-    res.status(200).json( "API GhuniNew" );
+    res.status(200).json("API GhuniNew");
 };
 const wsData = async (req, res) => {
     res.status(200).render("ws.html");
@@ -45,12 +53,12 @@ fs.readdirSync("./src/routes")
 
 // catch 404 and forward to error handler
 app.use((req, res) => {
-    res.status(404).json( req.originalUrl + " not found @GhuniNew" );
+    res.status(404).json(req.originalUrl + " not found @GhuniNew");
 });
 
 // error handler
 app.use((err, req, res) => {
-    res.status(500).json( "Server Error @GhuniNew", err );
+    res.status(500).json("Server Error @GhuniNew", err);
 });
 
 // http server
@@ -65,5 +73,6 @@ server.listen(config.port, () => {
 
 // socket.io
 app.io = socketIoInit(server);
+app.io.engine.use(sessionMiddleware);
 
 module.exports = app;

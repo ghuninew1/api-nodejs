@@ -11,8 +11,10 @@ module.exports = (server) => {
                 transports: ["polling", "websocket", "webtransport"],
                 cors: { origin: "*", credentials: true },
             });
-
             io.on("connection", async (socket) => {
+                const session = socket.request.session;
+                socket.join(session.id);
+
                 socket.conn.on("upgrade", () => {
                     if (socket.conn.transport.name === "webtransport") {
                         console.log("webtransport");
@@ -25,14 +27,13 @@ module.exports = (server) => {
                     }
                 });
 
-                socket.conn.transport.on("close", () => {
-                    console.log("transport close" + " " + socket.id);
-                });
-
-                console.log("socket connected", socket.id + " " + socket.conn.transport.name);
+                console.log("socket connected", socket.id + " " + session.id);
 
                 socket.on("disconnect", () => {
-                    console.log("socket disconnected", socket.conn.remoteAddress);
+                    console.log(
+                        "socket disconnected",
+                        socket.conn.remoteAddress + " " + socket.id + " " + session.id
+                    );
                 });
 
                 socket.on("error", (error) => {
