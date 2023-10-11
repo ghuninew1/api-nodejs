@@ -4,7 +4,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
-const session = require("express-session");
 
 const { config, connect } = require("./src/api/config/db.config");
 const socketIoInit = require("./src/services/socket");
@@ -13,13 +12,6 @@ const { middleware } = require("./src/api/middleware/middleware");
 
 connect();
 const app = express();
-
-const sessionMiddleware = session({
-    secret: "ghuninew",
-    resave: true,
-    saveUninitialized: true,
-});
-app.use(sessionMiddleware);
 
 // view engine setup
 app.set("views", path.join(__dirname, "./public"));
@@ -76,6 +68,5 @@ server.listen(config.port, () => {
 
 // socket.io
 app.io = socketIoInit(server);
-app.io.engine.use(sessionMiddleware);
 
 module.exports = app;

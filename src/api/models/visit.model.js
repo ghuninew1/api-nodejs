@@ -20,6 +20,4 @@ const visitSchema = new mongoose.Schema(
     }
 );
 
-visitSchema.index({ url: 1 }, { unique: true });
-
 module.exports = mongoose.model("visit", visitSchema, "visit");

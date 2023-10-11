@@ -12,33 +12,33 @@ exports.visitPageView = async (req, res) => {
                 const visit = await Visits.findOne({ url: url });
                 const visiturl = await Visits.find({ url: url });
                 if (visit) {
-                    return res.status(200).json({
+                    res.status(200).json({
                         url: url ? url : "",
-                        counter: visiturl.length ? visiturl.length : 0,
-                        ip: visit.ip ? visit.ip : [],
+                        counter: visiturl?.length ? visiturl.length : 0,
+                        ip: visit?.ip ? visit.ip : [],
                         visitAll: show === "all" && visitAll,
                         visitUrl: visiturl ? visiturl : [],
                     });
                 } else {
-                    return res.status(404).json( "Not Found" );
+                    res.status(404).json( "Not Found" );
                 }
             } else if (ip) {
                 const visit = await Visits.findOne({ ip: ip });
                 const visitip = await Visits.find({ ip: ip });
-                return res.status(200).json({
-                    url: visit.url ? visit.url : "",
-                    counter: visitip.length,
-                    ip: visit.ip ? visit.ip : [],
+                res.status(200).json({
+                    url: visit?.url ? visit.url : "",
+                    counter: visitip?.length,
+                    ip: visit.ip ? visit?.ip : [],
                     visitAll: show === "all" && visitAll,
                     visitIp: visitip ? visitip : [],
                 });
             } else {
-                return res.status(404).json( "Not Found" );
+                res.status(404).json( "Not Found" );
             }
         } else {
-            const visitAll = await Visits.find();
-            const visitUrl = visitAll.map((item) => item.url);
-            const visitIp = visitAll.map((item) => item.ip);
+            const visitAll = await Visits.find({});
+            const visitUrl = visitAll.map((item) => item?.url);
+            const visitIp = visitAll.map((item) => item?.ip);
             const counterAll = visitAll.reduce((acc, item) => acc + item.counter, 0);
             const visitAllIp = visitAll.reduce((acc, item) => {
                 if (acc[item.ip]) {
@@ -56,7 +56,7 @@ exports.visitPageView = async (req, res) => {
                 }
                 return acc;
             }, {});
-            return res.status(200).json({
+            res.status(200).json({
                 counterAll: counterAll ? counterAll : 0,
                 data: show === "all" && visitAll,
                 visitUrl: visitUrl ? visitUrl : [],

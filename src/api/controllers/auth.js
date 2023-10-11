@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
                 const isExpired = Date.now() > token.expires;
                 if (isExpired) {
                     user.tokens = [];
-                    user.save();
+                    await user.save();
                     jwt.sign(
                         payload,
                         "gnewsecret",
@@ -63,13 +63,13 @@ exports.login = async (req, res) => {
                             allowInsecureKeySizes: true,
                             algorithm: "HS512",
                         },
-                        (err, token) => {
+                        async (err, token) => {
                             if (err) throw err;
                             user.tokens = user.tokens.concat({
                                 token,
                                 expires: Date.now() + 86400000,
                             });
-                            user.save();
+                            await user.save();
                             user = user.toObject();
                             delete user.password;
                             return res.status(200).json(user);
@@ -89,13 +89,13 @@ exports.login = async (req, res) => {
                         allowInsecureKeySizes: true,
                         algorithm: "HS512",
                     },
-                    (err, token) => {
+                    async (err, token) => {
                         if (err) throw err;
                         user.tokens = user.tokens.concat({
                             token,
                             expires: Date.now() + 86400000,
                         });
-                        user.save();
+                        await user.save();
                         user = user.toObject();
                         delete user.password;
                         return res.status(200).json(user);
@@ -125,13 +125,13 @@ exports.currentUser = async (req, res) => {
     }
 };
 
-exports.currentUserWs = async (socket) => {
+exports.currentUserWs = (socket) => {
     try {
         socket.on("currentuser", async (users) => {
             const userdb = users.user
             const user = await db.users.findOne({ username: userdb }).select("-password").exec();
             if (!user) {
-                socket.emit("currentusered", "User not found");
+                // socket.emit("currentusered", "User not found");
                 console.log("User not found");
             }
             socket.emit("currentusered", user);

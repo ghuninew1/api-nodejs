@@ -1,35 +1,34 @@
-exports.ToLocalTime = (time) => {
+const { set } = require("../../server");
+
+exports.toLocalTime = (time) => {
     const date = new Date(time);
     return date.toLocaleString("th-TH");
 };
 
-exports.IsData = (data) => {
-    if (data !== null && data !== undefined && data !== "") return data;
+exports.isData = (data) => {
+    if (data !== null && data !== undefined && data) return data;
 };
 
-exports.IsDataArray = (data) => {
+exports.isDataArray = (data) => {
     if (data !== null && data !== undefined && data.length > 0) return data;
 };
 
-exports.IsDataObject = (data) => {
+exports.isDataObject = (data) => {
     if (data !== null && data !== undefined && Object.keys(data).length > 0) return data;
 };
 
-exports.IsDataObjectArray = (data) => {
+exports.isDataObjectArray = (data) => {
     if (data !== null && data !== undefined && data.length > 0 && Object.keys(data[0]).length > 0)
         return data;
 };
 
-exports.IsHidden = (data) => {
+exports.isHidden = (data) => {
     if (data === null || data === undefined || data === "") return data ? true : false;
 };
 
-exports.Image = ({ src, alt }) => {
-
-    return (
-        <img
-            src={src? src:"/images/404.png"}
-            alt={alt ? alt:"404"}
-        />
-    );
-}
+exports.resTime = (start) => {
+    if ( !start ) return process.hrtime();
+    const end = process.hrtime(start);
+    const responseTime = (end[0] * 1e3 + end[1]) * 1e-6;
+    return responseTime;
+};

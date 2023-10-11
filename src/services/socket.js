@@ -1,43 +1,25 @@
 const { Server } = require("socket.io");
 const { socketRoute } = require("./socketRoute");
+const { isData } = require("./utils");
 
 let io = null;
-
 module.exports = (server) => {
     try {
-        if (io === null || io === undefined) {
+        if (!isData(io) && isData(server)) {
             io = new Server(server, {
                 path: "/ws",
                 transports: ["polling", "websocket", "webtransport"],
                 cors: { origin: "*", credentials: true },
             });
-            io.on("connection", async (socket) => {
-                const session = socket.request.session;
-                socket.join(session.id);
+            io.on("connection", (socket) => {
+                console.log(socket.conn.transport.name +": "+ socket.id + " ,ip: " + socket.handshake.address);
 
                 socket.conn.on("upgrade", () => {
-                    if (socket.conn.transport.name === "webtransport") {
-                        console.log("webtransport");
-                    }
+                    console.log(socket.conn.transport.name);
                 });
 
-                socket.conn.transport.on("upgrade", () => {
-                    if (socket.conn.transport.name === "webtransport") {
-                        console.log("transport webtransport");
-                    }
-                });
-
-                console.log("socket connected", socket.id + " " + session.id);
-
-                socket.on("disconnect", () => {
-                    console.log(
-                        "socket disconnected",
-                        socket.conn.remoteAddress + " " + socket.id + " " + session.id
-                    );
-                });
-
-                socket.on("error", (error) => {
-                    console.log("socket error", error);
+                socket.on("disconnect", (reason) => {
+                    console.log(`id: ${socket.id} , ${reason} ,ip: ${socket.handshake.address}`);
                 });
 
                 socketRoute(socket);
