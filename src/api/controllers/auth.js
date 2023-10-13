@@ -6,10 +6,10 @@ exports.register = async (req, res) => {
     try {
         const { username, password, email } = req.body;
         if (!username || !password || !email || !username.trim() || !password.trim() || !email.trim())
-            return res.status(400).json( "Please enter all fields" );
+            res.status(400).json( "Please enter all fields" );
         let user = await db.users.findOne({ username });
         if (user) {
-            return res.status(400).json( "User already exists: " + user.username );
+            res.status(400).json( "User already exists: " + user.username );
         }
         const salt = await bcrypt.genSalt(10);
         user = new db.users({
@@ -27,7 +27,7 @@ exports.register = async (req, res) => {
         await user.save();
         user = user.toObject();
         delete user.password;
-        return res.status(201).json(user);
+        res.status(201).json(user);
     } catch (err) {
         res.status(500).json( "Server Error: " + err );
     }
@@ -37,15 +37,16 @@ exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
         let user = await db.users.findOneAndUpdate({ username }, { new: true });
-        if (user) {
+        if (user && user.enabled) {
             const isMatch = bcrypt.compare(password, user.password);
 
             if (!isMatch) {
-                return res.status(404).json( "Invalid Credentials Password" );
+                res.status(404).json( "Invalid Credentials Password" );
             }
             let payload = {
                 user: {
                     username: user.username,
+                    roles: user.roles,
                 },
             };
             if (user.tokens.length > 0) {
@@ -72,13 +73,13 @@ exports.login = async (req, res) => {
                             await user.save();
                             user = user.toObject();
                             delete user.password;
-                            return res.status(200).json(user);
+                            res.status(200).json(user);
                         }
                     );
                 } else {
                     user = user.toObject();
                     delete user.password;
-                    return res.status(200).json(user);
+                    res.status(200).json(user);
                 }
             } else {
                 jwt.sign(
@@ -98,12 +99,12 @@ exports.login = async (req, res) => {
                         await user.save();
                         user = user.toObject();
                         delete user.password;
-                        return res.status(200).json(user);
+                        res.status(200).json(user);
                     }
                 );
             }
         } else {
-            return res.status(404).json( "Invalid Credentials User not found" );
+            res.status(404).json( "Invalid Credentials User not found" );
         }
     } catch (err) {
         res.status(500).json("Server Error: " + err );
@@ -125,18 +126,3 @@ exports.currentUser = async (req, res) => {
     }
 };
 
-exports.currentUserWs = (socket) => {
-    try {
-        socket.on("currentuser", async (users) => {
-            const userdb = users.user
-            const user = await db.users.findOne({ username: userdb }).select("-password").exec();
-            if (!user) {
-                // socket.emit("currentusered", "User not found");
-                console.log("User not found");
-            }
-            socket.emit("currentusered", user);
-        });
-    } catch (err) {
-        console.log("error in currentuserws", err);
-    }
-};

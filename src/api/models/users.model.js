@@ -5,16 +5,22 @@ const usersSchema = new mongoose.Schema(
         username: String,
         email: String,
         password: String,
-        roles: [{
-            role: String,
-            id: Number,
-        }],
+        roles: [
+            {
+                role: String,
+                id: Number,
+            },
+        ],
         tokens: [
             {
                 token: String,
                 expires: Date,
             },
         ],
+        enabled: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,
