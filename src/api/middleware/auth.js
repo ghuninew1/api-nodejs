@@ -2,21 +2,22 @@ const jwt = require("jsonwebtoken");
 // const db = require("../models");
 const config = require("../config/auth.config");
 
-exports.auth = async (req, res, next) => {
+exports.auth = (req, res, next) => {
     try {
         const token = req?.headers["authtoken"];
-        if (!token) {
-            return res.status(401).json( "No token, authorization denied" );
-        }
+        !token && next({ statusCode: 403, message: "No token provided" });
         jwt.verify(token, config.secret, (err, decoded) => {
             if (err) {
-                return res.status(403).json( "Token is not valid" );
+                if (err.name === "TokenExpiredError") {
+                    throw next({ statusCode: 401, message: "Unauthorized! Access Token was expired!" });
+                }
+                throw next({ statusCode: 401, message: "Unauthorized!" });
             }
             req.user = decoded?.user;
             next();
         });
     } catch (err) {
-        res.status(500).json( "Server Error: " + err + " " + err.message);
+        next(err);
     }
 };
 

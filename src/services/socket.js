@@ -1,11 +1,10 @@
 const { Server } = require("socket.io");
 const { socketRoute } = require("./socketRoute");
-const { isData } = require("./utils");
 
 let io = null;
 module.exports = (server) => {
     try {
-        if (!isData(io) && isData(server)) {
+        if (!io && server) {
             io = new Server(server, {
                 path: "/ws",
                 transports: ["polling", "websocket", "webtransport"],

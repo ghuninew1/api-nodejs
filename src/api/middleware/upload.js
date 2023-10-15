@@ -23,18 +23,22 @@ exports.upload = (req, res, next) => {
             limits: { fileSize: 1024 * 1024 * 10000 },
         }).single("file");
         upload(req, res, function (err) {
-            if (err instanceof multer.MulterError) {
-                res.status(500).json( "Server Error: " + err + " " + err.message);
-            } else if (err) {
-                res.status(500).json( "Server Error: " + err + " " + err.message);
-            }
+            if (err instanceof multer.MulterError)
+                throw next({
+                    statusCode: 500,
+                    message: "Server Error: " + err + " " + err.message,
+                });
+            else if (err)
+                throw next({
+                    statusCode: 500,
+                    message: "Server Error: " + err + " " + err.message,
+                });
             next();
         });
-
     } catch (err) {
-        res.status(500).json( "Server Error: " + err + " " + err.message);
+        next(err);
     }
-}
+};
 
 exports.progressUpload = (req, res, next) => {
     try {
@@ -52,6 +56,6 @@ exports.progressUpload = (req, res, next) => {
         });
         next();
     } catch (err) {
-        res.status(500).json( "Server Error: " + err + " " + err.message);
+        next(err);
     }
 };

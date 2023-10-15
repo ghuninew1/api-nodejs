@@ -1,16 +1,14 @@
 const db = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const config = require("../config/auth.config");
 
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
     try {
         const { username, password, email } = req.body;
-        if (!username || !password || !email || !username.trim() || !password.trim() || !email.trim())
-            res.status(400).json( "Please enter all fields" );
+        !username || !password || !email && next({ statusCode: 404, message: "Missing fields" });
         let user = await db.users.findOne({ username });
-        if (user) {
-            res.status(400).json( "User already exists: " + user.username );
-        }
+        user && next({ statusCode: 400, message: "User already exists" });
         const salt = await bcrypt.genSalt(10);
         user = new db.users({
             username,
@@ -29,100 +27,112 @@ exports.register = async (req, res) => {
         delete user.password;
         res.status(201).json(user);
     } catch (err) {
-        res.status(500).json( "Server Error: " + err );
+        next(err);
     }
 };
 
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
     try {
         const { username, password } = req.body;
-        let user = await db.users.findOneAndUpdate({ username }, { new: true });
+        !username || !password && next({ statusCode: 404, message: "Missing fields" });
+        const user = await db.users.findOneAndUpdate({ username }, { new: true });
         if (user && user.enabled) {
             const isMatch = bcrypt.compare(password, user.password);
-
-            if (!isMatch) {
-                res.status(404).json( "Invalid Credentials Password" );
-            }
+            if (!isMatch) throw next({ statusCode: 400, message: "Invalid Credentials" });
             let payload = {
                 user: {
                     username: user.username,
-                    roles: user.roles,
+                    email: user.email,
+                    token: user.tokens[0]?.token,
+                    expires: user.tokens[0]?.expires,
                 },
             };
             if (user.tokens.length > 0) {
-                //check if token is expired
                 const token = user.tokens[0];
-                const isExpired = Date.now() > token.expires;
-                if (isExpired) {
+                if (Date.now() > token.expires) {
                     user.tokens = [];
                     await user.save();
-                    jwt.sign(
-                        payload,
-                        "gnewsecret",
-                        {
-                            expiresIn: "1d",
-                            allowInsecureKeySizes: true,
-                            algorithm: "HS512",
-                        },
-                        async (err, token) => {
-                            if (err) throw err;
-                            user.tokens = user.tokens.concat({
-                                token,
-                                expires: Date.now() + 86400000,
-                            });
-                            await user.save();
-                            user = user.toObject();
-                            delete user.password;
-                            res.status(200).json(user);
-                        }
-                    );
-                } else {
-                    user = user.toObject();
-                    delete user.password;
-                    res.status(200).json(user);
-                }
-            } else {
-                jwt.sign(
-                    payload,
-                    "gnewsecret",
-                    {
-                        expiresIn: "1d",
-                        allowInsecureKeySizes: true,
-                        algorithm: "HS512",
-                    },
-                    async (err, token) => {
-                        if (err) throw err;
+                    jwt.sign(payload, config.secret, config.option, async (err, token) => {
+                        if (err) throw next(err);
                         user.tokens = user.tokens.concat({
                             token,
                             expires: Date.now() + 86400000,
                         });
                         await user.save();
-                        user = user.toObject();
-                        delete user.password;
-                        res.status(200).json(user);
-                    }
-                );
+                        console.log("token expired");
+                        res.status(200).json(payload.user);
+                    });
+                } else {
+                    console.log("token not expired");
+                    res.status(200).json(payload.user);
+                }
+            } else {
+                jwt.sign(payload, config.secret, config.option, async (err, token) => {
+                    if (err) throw next(err);
+                    user.tokens = user.tokens.concat({
+                        token,
+                        expires: Date.now() + 86400000,
+                    });
+                    await user.save();
+                    console.log("not token");
+
+                    res.status(200).json({
+                        username: user.username,
+                        email: user.email,
+                        token: user.tokens[0]?.token,
+                        expires: user.tokens[0]?.expires,
+                    });
+                });
             }
-        } else {
-            res.status(404).json( "Invalid Credentials User not found" );
-        }
+        } else throw next({ statusCode: 400, message: "Invalid Credentials" });
     } catch (err) {
-        res.status(500).json("Server Error: " + err );
+        next(err);
     }
 };
 
-exports.currentUser = async (req, res) => {
+exports.currentUser = async (req, res, next) => {
     try {
         const user = await db.users
             .findOne({ username: req.user.username })
             .select("-password")
             .exec();
-        if (!user) {
-            res.status(404).json( "User not found" );
-        }
-        res.status(200).json(user);
+        !user && next({ statusCode: 404, message: "User not found" });
+        res.status(200).json({
+            username: user.username,
+            email: user.email,
+            role_id: user.roles[0]?.id,
+            token: user.tokens[0]?.token,
+            expires: user.tokens[0]?.expires,
+            updatedAt: user.updatedAt,
+        });
     } catch (err) {
-        res.status(500).json( "Server Error: " + err );
+        next(err);
     }
 };
 
+exports.confirmUser = async (req, res, next) => {
+    try {
+        const username = req.query.username;
+        !username && next({ statusCode: 404, message: "Missing fields" });
+        const user = await db.users.findOneAndUpdate({ username: username }, { new: true });
+
+        !user && next({ statusCode: 404, message: "User not found" });
+        if (user.enabled === false) {
+            user.enabled = true;
+            await user.save();
+            res.status(200).json({
+                enabled: true,
+                username: user.username,
+            });
+        } else {
+            user.enabled = false;
+            await user.save();
+            res.status(200).json({
+                enabled: false,
+                username: user.username,
+            });
+        }
+    } catch (err) {
+        next(err);
+    }
+};

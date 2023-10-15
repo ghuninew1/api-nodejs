@@ -1,31 +1,33 @@
 {
   "name": "@ghuninew1/api-nodejs",
-  "version": "1.4.6",
+  "version": "1.5.0",
   "description": "https://github.com/ghuninew1",
-  "main": "server.js",
   "author": "GhuniNew",
+  "type": "commonjs",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon ./bin/www",
     "pm2": "pm2 start server.js --name api-nodejs",
-    "dev2": "bun --watch run server.js",
-    "start": "node server.js"
+    "dev2": "bun --watch run ./bin/www",
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.6.1",
+    "express-session": "^1.17.3",
+    "mongoose": "^7.6.2",
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
-    "@types/node": "^20.8.4",
+    "@types/node": "^20.8.6",
     "bcryptjs": "^2.4.3",
     "ejs": "^3.1.9",
     "multer": "1.4.5-lts.1",
     "nodemon": "^3.0.1",
     "pidusage": "^3.0.2",
+    "morgan": "^1.10.0",
     "ping": "^0.4.4"
   },
   "repository": {
