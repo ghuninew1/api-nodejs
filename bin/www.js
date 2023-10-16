@@ -82,3 +82,5 @@ socketRoute(server);
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
+
+module.exports = server;

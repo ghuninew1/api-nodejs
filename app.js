@@ -6,7 +6,7 @@ const { handleError } = require("./services/utils");
 const session = require("express-session");
 const morgan = require("morgan");
 
-const app = (module.exports = express());
+const app = express();
 
 // view engine setup
 app.set("views", "./public");
@@ -44,3 +44,5 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     handleError(err, res);
 });
+
+module.exports = app;
