@@ -1,5 +1,5 @@
-const { auth } = require('../src/api/middleware/auth')
-const { register, login, currentUser, confirmUser} = require('../src/api/controllers/auth')
+const { auth } = require('../middleware/auth')
+const { register, login, currentUser, confirmUser} = require('../controllers/auth')
 const { Router } = require('express');
 const bodyParser = require('body-parser');
 

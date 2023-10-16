@@ -6,8 +6,8 @@
 const app = require("../app");
 const debug = (log) => console.log(log);
 const http = require("http");
-const { connect } = require("../src/api/config/db.config");
-const socketRoute = require("../src/services/socket");
+const { connect } = require("./db.config");
+const socketRoute = require("../services/socket");
 /**
  * Create HTTP server.
  */

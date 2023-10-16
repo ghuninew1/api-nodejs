@@ -117,24 +117,3 @@ exports.deleteAll = async (req, res, next) => {
         next(err);
     }
 };
-
-exports.lineNotify = async (req, res, next) => {
-    try {
-        const message = req.query.message || req.body.message;
-        if (message !== undefined) {
-            const url = "https://notify-api.line.me/api/notify";
-            const method = "POST";
-            const headers = {
-                "Content-Type": "application/x-www-form-urlencoded",
-                Authorization: `Bearer ${config.line_token}`,
-            };
-            const body = `message=${message}`;
-            await fetch(url, { method, headers, body })
-                .then((response) => response.json())
-                .then((data) => res.status(201).json("Send Success", data))
-                .catch((err) => next({ statusCode: 500, message: "Line Notify Error: " + err }));
-        } else throw next({ statusCode: 404, message: "Not Found enter message" });
-    } catch (err) {
-        next(err);
-    }
-};

@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const fs = require("fs");
-const { handleError } = require("./src/utils");
+const { handleError } = require("./services/utils");
 const session = require("express-session");
 const morgan = require("morgan");
 

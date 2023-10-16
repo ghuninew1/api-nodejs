@@ -7,7 +7,7 @@ const db = {};
 db.mongoose = mongoose;
 
 // name of the database
-const name = readdirSync("./src/api/models")
+const name = readdirSync("./models")
     .filter((file) => file.slice(-8) === "model.js" && file !== "index.js")
     .map((f) => f.slice(0, -9));
 

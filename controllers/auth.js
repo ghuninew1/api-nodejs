@@ -1,7 +1,7 @@
 const db = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const config = require("../config/auth.config");
+const {secret, option} = require("../bin/auth.config");
 
 exports.register = async (req, res, next) => {
     try {
@@ -52,7 +52,7 @@ exports.login = async (req, res, next) => {
                 if (Date.now() > token.expires) {
                     user.tokens = [];
                     await user.save();
-                    jwt.sign(payload, config.secret, config.option, async (err, token) => {
+                    jwt.sign(payload, secret, option, async (err, token) => {
                         if (err) throw next(err);
                         user.tokens = user.tokens.concat({
                             token,
@@ -67,7 +67,7 @@ exports.login = async (req, res, next) => {
                     res.status(200).json(payload.user);
                 }
             } else {
-                jwt.sign(payload, config.secret, config.option, async (err, token) => {
+                jwt.sign(payload, secret, option, async (err, token) => {
                     if (err) throw next(err);
                     user.tokens = user.tokens.concat({
                         token,

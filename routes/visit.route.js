@@ -1,6 +1,6 @@
 const { Router } = require('express');
-const { visitPageCreate, visitPageView } = require('../src/api/controllers/visit');
-const { auth } = require('../src/api/middleware/auth');
+const { visitPageCreate, visitPageView } = require('../controllers/visit');
+const { auth } = require('../middleware/auth');
 
 const router = Router();
 
