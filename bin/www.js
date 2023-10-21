@@ -63,7 +63,6 @@ const onError = (error) => {
     }
 };
 
-
 // Event listener for HTTP server "listening" event.
 const onListening = () => {
     const addr = server.address();
@@ -73,7 +72,6 @@ const onListening = () => {
 
 // mongoose connection
 connect();
-
 
 // socket.io connection
 socketRoute(server);
