@@ -1,6 +1,6 @@
 {
     "name": "gnew-api-nodejs",
-    "version": "1.5.2",
+    "version": "1.5.3",
     "description": "https://github.com/ghuninew1",
     "author": "GhuniNew",
     "type": "commonjs",
@@ -18,11 +18,11 @@
         "express": "^4.18.2",
         "express-session": "^1.17.3",
         "jsonwebtoken": "^9.0.2",
-        "mongoose": "^7.6.2",
+        "mongoose": "^7.6.3",
         "socket.io": "^4.7.2"
     },
     "devDependencies": {
-        "@types/node": "^20.8.6",
+        "@types/node": "^20.8.7",
         "bcryptjs": "^2.4.3",
         "ejs": "^3.1.9",
         "morgan": "^1.10.0",

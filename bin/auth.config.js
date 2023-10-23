@@ -6,8 +6,5 @@ module.exports = {
         expiresIn: "1d",
         allowInsecureKeySizes: true,
         algorithm: "HS512",
-    }
-    /* for test */
-    // jwtExpiration: 60,          // 1 minute
-    // jwtRefreshExpiration: 120,  // 2 minutes
+    },
 };
