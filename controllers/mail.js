@@ -40,6 +40,11 @@ exports.sendMail = async (req, res) => {
             message: "Send mail success",
         });
     } catch (err) {
-        console.log("Error: ", err);
+        console.log(err);
+        res.status(500).json({
+            status: "error",
+            statusCode: 500,
+            message: err.message,
+        });
     }
 };

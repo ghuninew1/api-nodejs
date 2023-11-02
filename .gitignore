@@ -14,6 +14,11 @@ dist-ssr
 *.env
 public/uploads/*
 src/api/config/db.config.js
+gh-pages
+gh-pages.pub
+deploy.yml
+OUTPUT
+INPUT
 
 # Editor directories and files
 .vscode/*
