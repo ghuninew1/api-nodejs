@@ -1,7 +1,6 @@
 const nodemailer = require("nodemailer");
-// async..await is not allowed in global scope, must use a wrapper
+
 async function main(to, subject, text, html) {
-    // สร้างออปเจ็ค transporter เพื่อกำหนดการเชื่อมต่อ SMTP และใช้ตอนส่งเมล
     let transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -13,11 +12,11 @@ async function main(to, subject, text, html) {
     });
 
     let info = await transporter.sendMail({
-        from: '"Fred Foo 👻" <xxxx@gmail.com>', // อีเมลผู้ส่ง
-        to: to, // อีเมลผู้รับ (ถ้าหลายๆ คน ให้ใช้ , เป็นตัวคั่น)
-        subject: subject, // หัวข้ออีเมล
-        text: text, // plain text body
-        html: html, // html body
+        from: '"GhuniNew 👻" <admin@ghuninew.com>', // อีเมลผู้ส่ง
+        to: to ? to : "aakanun43@gmail.com", // อีเมลผู้รับหากไม่ได้ระบุไว้
+        subject: subject ? subject : "Hello ✔", // หัวข้ออีเมล
+        text: text ? text : "Hello world?", // plain text body
+        html: html ? html : "<b>Hello world?</b>", // html body
     });
 
     console.log("Message sent: %s", info.messageId);
