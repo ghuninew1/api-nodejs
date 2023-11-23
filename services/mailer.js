@@ -4,7 +4,7 @@ require("dotenv").config();
 async function main(email, subject, text, html) {
     let transporter = nodemailer.createTransport(
         {
-            host: "smtp.ethereal.email",
+            host: "smtp.gmail.com",
             port: 587,
             secure: false,
             auth: {
@@ -25,10 +25,10 @@ async function main(email, subject, text, html) {
 
     let message = {
         from: '"GhuniNew" <ghuninew@localhost.local>',
-        to: "aakanun43@gmail.com",
-        subject: subject ? subject : "test",
+        to: email ? email : "aakanun43@gmail.com",
+        subject: subject ? subject : "mail test",
         text: text ? text : "test text",
-        html: html ? html : "html test",
+        html: html ? html : "<b>test html</b>",
     };
     transporter.sendMail(message, (err, info) => {
         if (err) {
